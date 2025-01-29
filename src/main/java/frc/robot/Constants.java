@@ -176,5 +176,7 @@ public final class Constants {
     public static final double maxAccel = 0;
     public static final double maxJerk = 0;
     public static final double collisionMultiplier = 0;
+    public static final double kAccel = 0;
+    public static final double kMovement = 0;
   }
 }

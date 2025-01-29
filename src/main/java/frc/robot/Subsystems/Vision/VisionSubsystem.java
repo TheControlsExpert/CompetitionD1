@@ -12,7 +12,7 @@ import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Vision.VisionIO.VisionIOInputs;
 
 public class VisionSubsystem extends SubsystemBase{
-   // Field2d field = new Field2d();
+   //ield2d field = new Field2d();
 
 
     private VisionIO io;
@@ -23,7 +23,7 @@ public class VisionSubsystem extends SubsystemBase{
         public VisionSubsystem(VisionIO io, Drive drive) {
                 this.io = io;
                 this.drive = drive;
-               // SmartDashboard.putData("field", field);
+               //artDashboard.putData("field", field);
 
     }
 
@@ -45,8 +45,15 @@ public class VisionSubsystem extends SubsystemBase{
 
 
     public void addVisionMeasurement(Pose2d pose, double timestamp, double[] std) {
-        drive.addvision(pose, timestamp, std);
-       // field.setRobotPose(new Pose2d(pose.getTranslation(), drive.getRotation()));
+        if (pose.getTranslation().getNorm() >0.0001) {
+
+        Rotation2d bob = pose.getRotation().plus(Rotation2d.fromDegrees(180));
+        
+        
+        drive.addvision(new Pose2d(pose.getTranslation(), bob), timestamp, std);
+       //ield.setRobotPose(new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(-drive.getRotationLL())));
+
+        }
 
 
     }

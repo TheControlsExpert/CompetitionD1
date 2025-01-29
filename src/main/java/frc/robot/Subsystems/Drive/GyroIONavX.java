@@ -14,8 +14,8 @@ public class GyroIONavX implements GyroIO {
   private final AHRS navX = new AHRS(NavXComType.kMXP_SPI, 200);
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
-  // private final Queue<Double> jerkXQueue;
-  // private final Queue<Double> jerkYQueue;
+  private final Queue<Double> jerkXQueue;
+  private final Queue<Double> jerkYQueue;
   private boolean resetHasntHappened = false;
 
   public GyroIONavX() {
@@ -25,8 +25,8 @@ public class GyroIONavX implements GyroIO {
     
     yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
     yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getAngle);
-    // jerkXQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getWorldLinearAccelX);
-    // jerkYQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getWorldLinearAccelY);
+    jerkXQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getWorldLinearAccelX);
+    jerkYQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getWorldLinearAccelY);
 
     // jerkpositionQueue = PhoenixOdometryThread.getInstance().registerSignal(() -> (Math.sqrt(
     //   navX.getRawAccelX() * navX.getRawAccelX() +
@@ -66,8 +66,8 @@ public class GyroIONavX implements GyroIO {
             .map((Double value) -> Rotation2d.fromDegrees(-value))
             .toArray(Rotation2d[]::new);
 
-    // inputs.odometryaccelXpositions = jerkXQueue.stream().mapToDouble((Double value) -> value).toArray();
-    // inputs.odometryaccelYpositions = jerkYQueue.stream().mapToDouble((Double value) -> value).toArray();
+     inputs.odometryaccelXpositions = jerkXQueue.stream().mapToDouble((Double value) -> value).toArray();
+     inputs.odometryaccelYpositions = jerkYQueue.stream().mapToDouble((Double value) -> value).toArray();
         
     LimelightHelpers.SetRobotOrientation("limelight-threegf", -navX.getYaw() + 54 + 180, 0, 0, 0, 0, 0);
     yawTimestampQueue.clear();
