@@ -10,6 +10,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Subsystems.Drive.ModuleIO.ModuleIOInputs;
 
 import org.littletonrobotics.junction.Logger;
 

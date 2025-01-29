@@ -50,7 +50,7 @@ public class VisionSubsystem extends SubsystemBase{
         Rotation2d bob = pose.getRotation().plus(Rotation2d.fromDegrees(180));
         
         
-        drive.addvision(new Pose2d(pose.getTranslation(), bob), timestamp, std);
+       // drive.addvision(new Pose2d(pose.getTranslation(), bob), timestamp, std);
        //ield.setRobotPose(new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(-drive.getRotationLL())));
 
         }

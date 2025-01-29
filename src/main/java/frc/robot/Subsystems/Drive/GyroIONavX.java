@@ -49,14 +49,14 @@ public class GyroIONavX implements GyroIO {
     if (!navX.isCalibrating() & !resetHasntHappened) {
       navX.zeroYaw();
       navX.reset();
-      navX.setAngleAdjustment(-54);
+      
       
       resetHasntHappened = true;
     }
 
     SmartDashboard.putNumber("gyro actual", navX.getYaw());
     inputs.connected = navX.isConnected();
-    inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw()-54);
+    inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw());
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());
 
     inputs.odometryYawTimestamps =
@@ -69,7 +69,7 @@ public class GyroIONavX implements GyroIO {
      inputs.odometryaccelXpositions = jerkXQueue.stream().mapToDouble((Double value) -> value).toArray();
      inputs.odometryaccelYpositions = jerkYQueue.stream().mapToDouble((Double value) -> value).toArray();
         
-    LimelightHelpers.SetRobotOrientation("limelight-threegf", -navX.getYaw() + 54 + 180, 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation("limelight-threegf", -navX.getYaw() + 180, 0, 0, 0, 0, 0);
     yawTimestampQueue.clear();
     yawPositionQueue.clear();
   }
