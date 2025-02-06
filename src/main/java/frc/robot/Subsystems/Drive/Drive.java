@@ -3,6 +3,13 @@ package frc.robot.Subsystems.Drive;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.CANBus;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
@@ -50,10 +57,7 @@ public class Drive extends SubsystemBase {
   // TunerConstants doesn't include these constants, so they are declared locally
   static final double ODOMETRY_FREQUENCY = 200;
  //   Vector<N2> pose = VecBuilder.fill(0, 0);
-  private double[] std = new double[] {0.1,0.1};
-  private double[] std_odom = new double[] {0.1, 0.1};
-
-
+  
 
 
   public Pose2d estimatedPose = new Pose2d();
@@ -99,6 +103,14 @@ private double std_valx = 0;
 private double std_valy = 0;
 private double diff_x = 0;
 private double diff_y = 0;
+
+public double stdX = 0.1;
+public double stdY = 0.1;
+
+public double stdX_odom = 0.1;
+public double stdY_odom = 0.1;
+
+
 
 
 
@@ -178,6 +190,7 @@ private final Field2d m_field = new Field2d();
             ModuleIO brModuleIO) {
           //this.initTime = Timer.getFPGATimestamp();
           this.gyroIO = gyroIO;
+          
           modules[0] = new Module(flModuleIO,0, SwerveConstants.Mod0.constants);
           modules[1] = new Module(frModuleIO, 1, SwerveConstants.Mod1.constants);
           modules[2] = new Module(blModuleIO, 2, SwerveConstants.Mod2.constants);
@@ -246,7 +259,7 @@ private final Field2d m_field = new Field2d();
               module.stop();
             }
           }
-      
+
           // Log empty setpoint states when disabled
           if (DriverStation.isDisabled()) {
             Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
@@ -321,6 +334,22 @@ private final Field2d m_field = new Field2d();
                 SmartDashboard.putNumber("collision?", numTimes);
                 numTimes++;
 
+                SparkFlex flex = new SparkFlex(0, MotorType.kBrushless);
+                SparkBaseConfig config = new SparkFlexConfig();
+
+                //first one is p, then i, then d. p = 0.001, d = 0, i = 0.
+                config.closedLoop.pid(0.001, 0, 0);
+
+                flex.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+                //persist means that values are saved to the motor even after it is turned off, but I dont want that
+                //reset mode js resets everything to default values
+
+                //heres how to call a pid to make the motor go to 5  
+
+                flex.getClosedLoopController().setReference(5, ControlType.kPosition);
+
+                
+
                
               
 
@@ -355,22 +384,23 @@ private final Field2d m_field = new Field2d();
 
                SmartDashboard.putNumber("std_x_after loop", stdX_addition);
                SmartDashboard.putNumber("std_y_after loop", stdY_addition);
+              // double initBinut = std[0];
 
-              std[0] += Math.abs(stdX_addition);
-              std[1] += Math.abs(stdY_addition);
+              stdX += Math.abs(stdX_addition);
+              stdY += Math.abs(stdY_addition);
 
-              SmartDashboard.putNumber("intermediate", std[0]);
-
-
+              SmartDashboard.putNumber("whigga", stdX);
 
 
-              std_odom[0] += Math.abs(stdX_addition);
-              std_odom[1] += Math.abs(stdY_addition);
+
+
+              stdX_odom += Math.abs(stdX_addition);
+              stdY_odom += Math.abs(stdY_addition);
 
             
 
-               SDBufferX.addSample(sampleTimestamps[i], std_odom[0]);
-               SDBufferY.addSample(sampleTimestamps[i], std_odom[1]);
+               SDBufferX.addSample(sampleTimestamps[i], stdX_odom);
+               SDBufferY.addSample(sampleTimestamps[i], stdY_odom);
 
 
 
@@ -589,10 +619,10 @@ private final Field2d m_field = new Field2d();
        double[] stds_at_time_odom = {SDBufferX.getSample(timestamp).get(), SDBufferY.getSample(timestamp).get()};
 
        backwards_twist = odom_pose_at_time.minus(odometryPose);
-       double[] backward_std = {stds_at_time_odom[0] - std_odom[0], stds_at_time_odom[1] - std_odom[1]};
+       double[] backward_std = {stds_at_time_odom[0] - stdX_odom, stds_at_time_odom[1] - stdY_odom};
 
        pose_at_time = estimatedPose.transformBy(backwards_twist);
-       double[] stds_at_time = {std[0] - backward_std[0], std[1] - backward_std[1]};
+       double[] stds_at_time = {stdX - backward_std[0], stdY - backward_std[1]};
 
       //Vector<N2> posVector = VecBuilder.fill(pose_at_time.getX(), pose_at_time.getY());
 
@@ -612,8 +642,8 @@ private final Field2d m_field = new Field2d();
        diff_x = std_valx - stds_at_time[0];
        diff_y = std_valy - stds_at_time[1];
 
-      std[0] = diff_x + std[0];
-      std[1] = diff_y + std[1];
+      stdX = diff_x + stdX;
+      stdY = diff_y + stdY;
 
       poseLock.unlock();
 
