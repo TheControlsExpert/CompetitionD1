@@ -3,6 +3,10 @@ package frc.robot.Subsystems.Drive;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.CANBus;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -18,6 +22,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -59,7 +64,7 @@ public class Drive extends SubsystemBase {
  //   Vector<N2> pose = VecBuilder.fill(0, 0);
   
 
-
+  public LinearFilter filter = LinearFilter.movingAverage(10);
   public Pose2d estimatedPose = new Pose2d();
   public Pose2d odometryPose = new Pose2d();
   public Pose2d lastodometrypose = new Pose2d();
@@ -111,7 +116,7 @@ public double stdX_odom = 0.1;
 public double stdY_odom = 0.1;
 
 
-
+public double tester = 0.1;
 
 
 
@@ -202,6 +207,43 @@ private final Field2d m_field = new Field2d();
           // Start odometry thread
           PhoenixOdometryThread.getInstance().start();
 
+             RobotConfig config;
+    try{
+      config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      // Handle exception as needed
+      e.printStackTrace();
+    }
+
+    // Configure AutoBuilder last
+    AutoBuilder.configure(
+            this::getEstimatedPosition, // Robot pose supplier
+            this::resetPosition, // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+            ),
+            config, // The robot configuration
+            () -> {
+              // Boolean supplier that controls when the path will be mirrored for the red alliance
+              // This will flip the path being followed to the red side of the field.
+              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+              var alliance = DriverStation.getAlliance();
+              if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+              }
+              return false;
+            },
+            this // Reference to this subsystem to set requirements
+    );
+  }
+}
+
+          
+
           
           
     
@@ -243,7 +285,10 @@ private final Field2d m_field = new Field2d();
       
         @Override
         public void periodic() {
-          SmartDashboard.putNumber("bop bop", numTimes);
+          m_field.setRobotPose(estimatedPose);
+          tester += 0.1;
+          SmartDashboard.putNumber("tester", tester);
+          //SmartDashboard.putNumber("bop bop", numTimes);
           odometryLock.lock(); // Prevents odometry updates while reading data
           gyroIO.updateInputs(gyroInputs);
           Logger.processInputs("Drive/Gyro", gyroInputs);
@@ -300,10 +345,13 @@ private final Field2d m_field = new Field2d();
 
            poseLock.lock();
 
+           try {
+
            if (twist.dx < 0.5 && twist.dy < 0.5 ) {
             SmartDashboard.putBoolean("exped twist", true);
 
            estimatedPose = estimatedPose.exp(twist);
+           estimatedPose = new Pose2d(estimatedPose.getX(), estimatedPose.getY(), gyroInputs.yawPosition);
            
            SmartDashboard.putNumber("translaltion-val", twist.dx + twist.dy);
            odometryPose = odometryPose.exp(twist);
@@ -315,38 +363,59 @@ private final Field2d m_field = new Field2d();
 
            
 
-            accelX = gyroInputs.odometryaccelXpositions[i];
-            accely = gyroInputs.odometryaccelYpositions[i];
+            accelX = filter.calculate(gyroInputs.odometryaccelXpositions);
+            accely = gyroInputs.odometryaccelYpositions;
+            
+            
+            SmartDashboard.putNumber("ratio accels", accelX/accely);
+
+            
+
+           
             
 
            if (Math.abs(accelX - prevaccelX) > Constants.SwerveConstants.maxJerk | 
                Math.abs(accely - prevaccelY) > Constants.SwerveConstants.maxJerk) {
 
+                SmartDashboard.putNumber("jerkX", accelX - prevaccelX);
+                SmartDashboard.putNumber("jerkY", accely - prevaccelY);
+
                 //if there is a collision
 
-                 accelX_fieldO = accelX * Math.cos(gyroInputs.odometryYawPositions[i].getRadians()) - accely * Math.sin(gyroInputs.odometryYawPositions[i].getRadians());
-                 accelY_fieldO = accelX * Math.sin(gyroInputs.odometryYawPositions[i].getRadians()) + accely * Math.cos(gyroInputs.odometryYawPositions[i].getRadians());
+                 //accelX_fieldO = accelX * Math.cos(gyroInputs.odometryYawPositions[i].getRadians()) - accely * Math.sin(gyroInputs.odometryYawPositions[i].getRadians());
+                 //accelY_fieldO = accelX * Math.sin(gyroInputs.odometryYawPositions[i].getRadians()) + accely * Math.cos(gyroInputs.odometryYawPositions[i].getRadians());
 
+                 //ChassisSpeeds fieldOriented = ChassisSpeeds.fromRobotRelativeSpeeds(-accelX+prevaccelX, -accely+prevaccelY, 0, gyroInputs.odometryYawPositions[i]);
+
+                //SmartDashboard.putNumber("accel x FO", fieldOriented.vxMetersPerSecond);
+                //SmartDashboard.putNumber("accel y FO", fieldOriented.vyMetersPerSecond);
                 
-  
-                //stdX = Constants.SwerveConstants.kAccel * accelX_fieldO;
-                //stdY = Constants.SwerveConstants.kAccel * accelY_fieldO ;
-                SmartDashboard.putNumber("collision?", numTimes);
-                numTimes++;
+                double totalAccel = Math.sqrt(accelX * accelX + accely * accely);
+                
+              
 
-                SparkFlex flex = new SparkFlex(0, MotorType.kBrushless);
-                SparkBaseConfig config = new SparkFlexConfig();
+                double hypotXDiff = Math.hypot(stdX, Constants.SwerveConstants.kAccel * totalAccel) - stdX;
+                double hypotYDiff = Math.hypot(stdY, Constants.SwerveConstants.kAccel * totalAccel) - stdY;
+                stdX += hypotXDiff;
+                stdY += hypotYDiff;
+                stdX_odom += hypotXDiff;
+                stdY_odom += hypotYDiff;
+                SmartDashboard.putBoolean("collision? :)", true);
+                //numTimes++;
+
+                //SparkFlex flex = new SparkFlex(0, MotorType.kBrushless);
+                //SparkBaseConfig config = new SparkFlexConfig();
 
                 //first one is p, then i, then d. p = 0.001, d = 0, i = 0.
-                config.closedLoop.pid(0.001, 0, 0);
+                //config.closedLoop.pid(0.001, 0, 0);
 
-                flex.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+                //flex.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
                 //persist means that values are saved to the motor even after it is turned off, but I dont want that
                 //reset mode js resets everything to default values
 
                 //heres how to call a pid to make the motor go to 5  
 
-                flex.getClosedLoopController().setReference(5, ControlType.kPosition);
+                //flex.getClosedLoopController().setReference(5, ControlType.kPosition);
 
                 
 
@@ -358,6 +427,7 @@ private final Field2d m_field = new Field2d();
 
                else {
                 //no collision 
+                SmartDashboard.putBoolean("collision? :)", false);
 
                 
 
@@ -370,32 +440,49 @@ private final Field2d m_field = new Field2d();
                 SmartDashboard.putBoolean("no collision called", true);
 
                 ratio = getSkiddingRatio(mods, kinematics);
+                if (ratio > 50) {
+                  ratio = 50;
+                }
                 SmartDashboard.putNumber("skidding ratio", ratio);
                 SmartDashboard.putNumber("diff odom x", odometryPose.getX() - lastodometrypose.getX());
-                stdX_addition = Constants.SwerveConstants.kMovement * ratio * (odometryPose.getX() - lastodometrypose.getX());
-                stdY_addition = Constants.SwerveConstants.kMovement * ratio * (odometryPose.getY() - lastodometrypose.getY());
+                SmartDashboard.putNumber("diff odom y", odometryPose.getY() - lastodometrypose.getY());
+                stdX_addition = Math.abs( Constants.SwerveConstants.kMovement * ratio * (odometryPose.getX() - lastodometrypose.getX()));
+                stdY_addition = Math.abs(Constants.SwerveConstants.kMovement * ratio * (odometryPose.getY() - lastodometrypose.getY()));
 
-                SmartDashboard.putNumber("stdx", stdX_addition);
+               SmartDashboard.putNumber("stdx", stdX_addition);
                 SmartDashboard.putNumber("stdy", stdY_addition);
+                if (Math.abs(stdX_addition) > 0 & Math.abs(stdY_addition) > 0) {
+                SmartDashboard.putNumber("ratio of stdADD", stdX_addition/stdY_addition);
+                }
 
                 lastodometrypose = odometryPose;
 
                }
 
-               SmartDashboard.putNumber("std_x_after loop", stdX_addition);
-               SmartDashboard.putNumber("std_y_after loop", stdY_addition);
-              // double initBinut = std[0];
+              
+              
+               //double stdXPREV = stdX;
+               if (Math.abs(stdX_addition) > 0.00000000001 && Math.abs(stdX_addition) > 0.00000000001) {
+                double hypotXDiff = Math.hypot(stdX, stdX_addition) - stdX;
+                double hypotYDiff = Math.hypot(stdY, stdY_addition) - stdY;
+                stdX += hypotXDiff;
+                stdY += hypotYDiff;
+                stdX_odom += hypotXDiff;
+                stdY_odom += hypotYDiff;
 
-              stdX += Math.abs(stdX_addition);
-              stdY += Math.abs(stdY_addition);
 
-              SmartDashboard.putNumber("whigga", stdX);
+               }
+             
+              //stdY = (double) stdY + (double) stdY_addition;
+
+              SmartDashboard.putNumber("intermedioso", stdX);
+
+              
 
 
 
 
-              stdX_odom += Math.abs(stdX_addition);
-              stdY_odom += Math.abs(stdY_addition);
+              
 
             
 
@@ -405,9 +492,13 @@ private final Field2d m_field = new Field2d();
 
 
               }
+            }
+
+            finally {
 
 
               poseLock.unlock();
+            }
         // Apply update
         // int sum = 0;
   
@@ -448,11 +539,12 @@ private final Field2d m_field = new Field2d();
       }
         
         
-        m_field.setRobotPose(odometryPose);
+        //m_field.setRobotPose(estimatedPose);
          SmartDashboard.putNumber("x-val", estimatedPose.getX());
          SmartDashboard.putNumber("y-val",estimatedPose.getY());
-        //  SmartDashboard.putNumber("stds x", std[0]);
-        //  SmartDashboard.putNumber("stds y", std[1]);
+
+          SmartDashboard.putNumber("stds x", stdX);
+          SmartDashboard.putNumber("stds y", stdY);
 
 
         // SmartDashboard.putNumber("gyro", SwervePoseEstimator.getEstimatedPosition().getRotation().getDegrees());
@@ -460,6 +552,8 @@ private final Field2d m_field = new Field2d();
   
       // Update gyro alert
       gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+      prevaccelX = accelX;
+      prevaccelY = accely;
       //m_field.setRobotPose(getPose());
   }
 
@@ -488,7 +582,7 @@ private final Field2d m_field = new Field2d();
       // Calculate module setpoints
       ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
       SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-      SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, 0.25);
+      SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, getMaxLinearSpeedMetersPerSec());
   
       // Log unoptimized setpoints and setpoint speeds
       Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -610,46 +704,74 @@ private final Field2d m_field = new Field2d();
     }
   
 
-    public void addVision(Pose2d pose, double timestamp, Vector<N2> visionstds) {
+    public void addVision(Pose2d pose, double timestamp, double[] visionstds) {
       SmartDashboard.putBoolean("what the sigma", true);
 
       poseLock.lock();
       //add smthn to make sure timestamp is in correct interval
-       odom_pose_at_time = poseBuffer.getSample(timestamp).get();
-       double[] stds_at_time_odom = {SDBufferX.getSample(timestamp).get(), SDBufferY.getSample(timestamp).get()};
+       //odom_pose_at_time = poseBuffer.getSample(timestamp).get();
+       //m_field.setRobotPose(odom_pose_at_time);
+       
+       //double[] stds_at_time_odom = {SDBufferX.getSample(timestamp).get(), SDBufferY.getSample(timestamp).get()};
+      // SmartDashboard.putNumber("stds at time", stds_at_time_odom[0]);
 
-       backwards_twist = odom_pose_at_time.minus(odometryPose);
-       double[] backward_std = {stds_at_time_odom[0] - stdX_odom, stds_at_time_odom[1] - stdY_odom};
+      // backwards_twist = odom_pose_at_time.minus(odometryPose);
+      // SmartDashboard.putNumber("length of transform", backwards_twist.getY());
 
-       pose_at_time = estimatedPose.transformBy(backwards_twist);
-       double[] stds_at_time = {stdX - backward_std[0], stdY - backward_std[1]};
+       //double[] backward_std = {stds_at_time_odom[0] - stdX_odom, stds_at_time_odom[1] - stdY_odom};
+
+       //pose_at_time = new Pose2d(estimatedPose.getX() + backwards_twist.getX(), estimatedPose.getY() + backwards_twist.getY(), estimatedPose.getRotation());
+       
+       //estimatedPose.transformBy(backwards_twist);
+      
+       //SmartDashboard.putNumber("stds XXXXXXX :(", visionstds[0]);
+       //SmartDashboard.putNumber("stds YYYYY nigga nigga nigfa", visionstds[1]);
+
+       //double[] stds_at_time = {stdX - backward_std[0], stdY - backward_std[1]};
+       //SmartDashboard.putNumber("stds at time????", stds_at_time[0]);
 
       //Vector<N2> posVector = VecBuilder.fill(pose_at_time.getX(), pose_at_time.getY());
 
-       xval = (1/(Math.pow(stds_at_time[0], 2) + Math.pow(visionstds.get(0), 2))) * (1/Math.pow(stds_at_time[0], 2) * pose_at_time.getX() + 1/Math.pow(visionstds.get(0),2) * pose.getX()); 
-       yval = (1/(Math.pow(stds_at_time[1], 2) + Math.pow(visionstds.get(1), 2))) * (1/Math.pow(stds_at_time[1], 2) * pose_at_time.getY() + 1/Math.pow(visionstds.get(1),2) * pose.getY()); 
+       xval = (1/(1/Math.pow(stdX, 2) + 1/Math.pow(visionstds[0], 2))) * (1/Math.pow(stdX, 2) * estimatedPose.getX() + 1/Math.pow(visionstds[0],2) * pose.getX()); 
+       yval = (1/(1/Math.pow(stdY, 2) + 1/Math.pow(visionstds[1], 2))) * (1/Math.pow(stdY, 2) * estimatedPose.getY() + 1/Math.pow(visionstds[1],2) * pose.getY()); 
 
-       forwardTransform = new Pose2d(xval, yval, pose_at_time.getRotation()).minus(pose_at_time);
-      estimatedPose = estimatedPose.plus(forwardTransform);
+      // forwardTransform = new Pose2d(xval, yval, pose_at_time.getRotation()).minus(pose_at_time);
+      estimatedPose = new Pose2d(xval, yval, estimatedPose.getRotation());
 
 
-       std_valx = 1 / Math.sqrt(1/(visionstds.get(0) * visionstds.get(0)) + 1/(stds_at_time[0] * stds_at_time[0]));
+       stdX = 1 / Math.sqrt(1/(visionstds[0] * visionstds[0]) + 1/(stdX * stdX));
       
 
-       std_valy = 1 / Math.sqrt(1/(visionstds.get(1) * visionstds.get(1)) + 1/(stds_at_time[1] * stds_at_time[1]));
+       stdY = 1 / Math.sqrt(1/(visionstds[1] * visionstds[1]) + 1/(stdY * stdY));
       
 
-       diff_x = std_valx - stds_at_time[0];
-       diff_y = std_valy - stds_at_time[1];
+      //  diff_x = std_valx - stds_at_time[0];
+      //  diff_y = std_valy - stds_at_time[1];
 
-      stdX = diff_x + stdX;
-      stdY = diff_y + stdY;
+      // stdX = diff_x + stdX;
+      // stdY = diff_y + stdY;
 
       poseLock.unlock();
 
       
 
       //Vector<N2> estimation = ()
+    }
+
+    public Pose2d getEstimatedPosition() {
+      return estimatedPose;
+    }
+
+
+    public void resetPosition(Pose2d pose) {
+      poseLock.lock();
+      estimatedPose = pose;
+      gyroIO.resetGyro(pose.getRotation());
+
+
+      stdX = 0.1;
+      stdY = 0.1;
+      poseLock.unlock();
     }
   
 //  
@@ -693,7 +815,7 @@ private final Field2d m_field = new Field2d();
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {
-    return 0.25;
+    return 4;
   }
 
   /** Returns the maximum angular speed in radians per sec. */

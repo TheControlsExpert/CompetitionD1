@@ -174,9 +174,9 @@ public final class Constants {
     public static final LinearVelocity MaxFreeSpeed = null;
     public static final double odometryConstant = 0;
     public static final double maxAccel = 0;
-    public static final double maxJerk = 100;
-    public static final double collisionMultiplier = 0;
-    public static final double kAccel = 0;
-    public static final double kMovement = 1;
+    public static final double maxJerk = 1.2;
+    public static final double collisionMultiplier = 0.1;
+    public static final double kAccel = 0.05;
+    public static final double kMovement = 0.45;
   }
 }

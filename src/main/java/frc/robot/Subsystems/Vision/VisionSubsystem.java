@@ -2,8 +2,11 @@ package frc.robot.Subsystems.Vision;
 
 import java.lang.reflect.Field;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -12,7 +15,7 @@ import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Vision.VisionIO.VisionIOInputs;
 
 public class VisionSubsystem extends SubsystemBase{
-   //ield2d field = new Field2d();
+   //Field2d field = new Field2d();
 
 
     private VisionIO io;
@@ -23,7 +26,7 @@ public class VisionSubsystem extends SubsystemBase{
         public VisionSubsystem(VisionIO io, Drive drive) {
                 this.io = io;
                 this.drive = drive;
-               //artDashboard.putData("field", field);
+               //SmartDashboard.putData("field", field);
 
     }
 
@@ -31,7 +34,7 @@ public class VisionSubsystem extends SubsystemBase{
     public void periodic() {
         io.updateInputs(inputs);
 
-        if (inputs.isNew_LL3GF) {
+        if (inputs.isNew_LL3GF & !inputs.MT2pose_LL3GF.equals(new Pose2d()) & inputs.visionSTDs_LL3GF[0] != 0 && inputs.visionSTDs_LL3GF[1] !=0) {
             SmartDashboard.putBoolean("adding measurement", true);
             addVisionMeasurement(inputs.MT2pose_LL3GF, inputs.time_LL3GF, inputs.visionSTDs_LL3GF);
         }
@@ -48,10 +51,11 @@ public class VisionSubsystem extends SubsystemBase{
         if (pose.getTranslation().getNorm() >0.0001) {
 
         Rotation2d bob = pose.getRotation().plus(Rotation2d.fromDegrees(180));
+        Vector<N2> stds = VecBuilder.fill(std[0], std[1]);
         
         
-       // drive.addvision(new Pose2d(pose.getTranslation(), bob), timestamp, std);
-       //ield.setRobotPose(new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(-drive.getRotationLL())));
+        drive.addVision(pose, timestamp, std);
+       //field.setRobotPose(new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(-drive.getRotationLL())));
 
         }
 

@@ -78,7 +78,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(Mod3.constants, 3));
        
 
-                //VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
+                VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
     // Set up SysId routines
     //autoChooser.addOption(
     //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
@@ -115,19 +115,19 @@ public class RobotContainer {
             drive));
 
 
-    // controller.a().whileTrue(Commands.run(() -> 
+    controller.a().whileTrue(Commands.run(() -> 
     
-// drive.runVelocity(
-//     ChassisSpeeds.fromFieldRelativeSpeeds(
-//       driver.getTargetSpeeds(drive.getPose(), new Pose2d()),
-//         isFlipped
-//             ? drive.getRotation().plus(new Rotation2d(Math.PI))
-//             : drive.getRotation())), drive));
+drive.runVelocity(
+    ChassisSpeeds.fromFieldRelativeSpeeds(
+      driver.getTargetSpeeds(drive.getEstimatedPosition(), new Pose2d(16.37, 7.04, Rotation2d.fromDegrees(58))),
+        isFlipped
+            ? drive.getRotation().plus(new Rotation2d(Math.PI))
+            : drive.getRotation())), drive));
     
     
     
    
-    controller.y().onTrue(Commands.runOnce(() -> gyro.resetGyro()));
+   // controller.y().onTrue(Commands.runOnce(() -> gyro.resetGyro()));
 
     // Lock to 0° when A button is held
     // controller

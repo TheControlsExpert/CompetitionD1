@@ -42,6 +42,8 @@ public class VisionIO_Limelight implements VisionIO {
         inputs.time_LL3GF = timestamp;
         inputs.tagCount_LL3GF = shit.value[7];
         double[] std = {shit_std.value[6], shit_std.value[7], 999999999};
+        SmartDashboard.putNumber("std vision x", std[0]);
+        SmartDashboard.putNumber("std vision Y", std[1]);
 
         inputs.visionSTDs_LL3GF = std;
 

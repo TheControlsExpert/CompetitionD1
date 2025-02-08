@@ -2,8 +2,11 @@ package frc.robot.Subsystems.Drive;
 
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.LimelightHelpers;
 
@@ -12,10 +15,12 @@ import java.util.Queue;
 /** IO implementation for NavX. */
 public class GyroIONavX implements GyroIO {
   private final AHRS navX = new AHRS(NavXComType.kMXP_SPI, 200);
+  private final BuiltInAccelerometer accelerometer = new BuiltInAccelerometer();
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
-  private final Queue<Double> jerkXQueue;
-  private final Queue<Double> jerkYQueue;
+  double rotation_offset = 0;
+  // private final Queue<Double> jerkXQueue;
+  // private final Queue<Double> jerkYQueue;
   private boolean resetHasntHappened = false;
 
   public GyroIONavX() {
@@ -24,9 +29,9 @@ public class GyroIONavX implements GyroIO {
     SmartDashboard.putNumber("reset pos", navX.getYaw());
     
     yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
-    yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getAngle);
-    jerkXQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getWorldLinearAccelX);
-    jerkYQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getWorldLinearAccelY);
+    yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getYaw);
+    //jerkXQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getWorldLinearAccelX);
+    //jerkYQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getWorldLinearAccelY);
 
     // jerkpositionQueue = PhoenixOdometryThread.getInstance().registerSignal(() -> (Math.sqrt(
     //   navX.getRawAccelX() * navX.getRawAccelX() +
@@ -56,7 +61,7 @@ public class GyroIONavX implements GyroIO {
 
     SmartDashboard.putNumber("gyro actual", navX.getYaw());
     inputs.connected = navX.isConnected();
-    inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw());
+    inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw()  + rotation_offset);
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());
 
     inputs.odometryYawTimestamps =
@@ -66,11 +71,18 @@ public class GyroIONavX implements GyroIO {
             .map((Double value) -> Rotation2d.fromDegrees(-value))
             .toArray(Rotation2d[]::new);
 
-     inputs.odometryaccelXpositions = jerkXQueue.stream().mapToDouble((Double value) -> value).toArray();
-     inputs.odometryaccelYpositions = jerkYQueue.stream().mapToDouble((Double value) -> value).toArray();
+     inputs.odometryaccelXpositions = accelerometer.getX();
+     inputs.odometryaccelYpositions = accelerometer.getY();
         
-    LimelightHelpers.SetRobotOrientation("limelight-threegf", -navX.getYaw() + 180, 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation("limelight-threegf", -navX.getYaw() + rotation_offset, 0 ,0 ,0 ,0 ,0 );
+    SmartDashboard.putBoolean("setting robot orientation", true);
+    SmartDashboard.putNumber("reset pos",  -navX.getYaw() );
     yawTimestampQueue.clear();
     yawPositionQueue.clear();
+  }
+
+  public void resetGyro(Rotation2d rotation) {
+    rotation_offset = rotation.getDegrees() - (-navX.getYaw());
+
   }
 }

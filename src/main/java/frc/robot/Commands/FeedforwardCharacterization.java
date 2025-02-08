@@ -1,6 +1,5 @@
 package frc.robot.Commands;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
