@@ -98,6 +98,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     driveConfig.Slot0 = SwerveConstants.intrinsicsD;
     driveConfig.Feedback.SensorToMechanismRatio = SwerveConstants.driveReduction;
+    
     driveConfig.MotorOutput.Inverted =
         constants.invertDrive()
             ? InvertedValue.Clockwise_Positive
@@ -105,6 +106,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     driveTalon.getConfigurator().apply(driveConfig, 0.25);
     driveTalon.setPosition(0.0, 0.25);
+    
 
     // Configure turn motor
     var turnConfig = new TalonFXConfiguration();
@@ -222,22 +224,22 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   @Override
   public void setDriveOpenLoop(double output) {
-    driveTalon.setControl(voltageRequest.withOutput(output));
+    driveTalon.setControl(voltageRequest.withOutput(output).withEnableFOC(true));
   }
 
   @Override
   public void setTurnOpenLoop(double output) {
-    turnTalon.setControl(voltageRequest.withOutput(output));
+    turnTalon.setControl(voltageRequest.withOutput(output).withEnableFOC(true));
   }
 
   @Override
   public void setDriveVelocity(double velocityRadPerSec) {
     double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
-    driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec));
+    driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec).withEnableFOC(true));
   }
 
   @Override
   public void setTurnPosition(Rotation2d rotation) {
-    turnTalon.setControl(positionVoltageRequest.withPosition(rotation.getRotations()));
+    turnTalon.setControl(positionVoltageRequest.withPosition(rotation.getRotations()).withEnableFOC(true));
   }
 }

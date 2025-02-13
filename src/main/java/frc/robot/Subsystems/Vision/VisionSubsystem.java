@@ -51,10 +51,15 @@ public class VisionSubsystem extends SubsystemBase{
         if (pose.getTranslation().getNorm() >0.0001) {
 
         Rotation2d bob = pose.getRotation().plus(Rotation2d.fromDegrees(180));
-        Vector<N2> stds = VecBuilder.fill(std[0], std[1]);
+        Vector<N2> stds = VecBuilder.fill(std[0] * 2.5, std[1] * 2.5);
+        SmartDashboard.putNumber("translation diff", pose.minus(drive.getEstimatedPosition()).getTranslation().getNorm());
+
+        if (pose.minus(drive.getEstimatedPosition()).getTranslation().getNorm() < 1) {
+
         
         
         drive.addVision(pose, timestamp, std);
+        }
        //field.setRobotPose(new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(-drive.getRotationLL())));
 
         }

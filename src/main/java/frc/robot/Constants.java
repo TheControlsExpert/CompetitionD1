@@ -15,6 +15,8 @@ package frc.robot;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -55,13 +57,13 @@ public final class Constants {
     public static final double angleKS = 0.2999;
 
     /* Drive Motor PID Values */
-    public static final double driveKP = 0.00; // TODO: This must be tuned to specific robot
+    public static final double driveKP = 0.01; // TODO: This must be tuned to specific robot
     public static final double driveKI = 0.0;
     public static final double driveKD = 0.0;
 
     /* Drive Motor Characterization Values From SYSID */
-    public static final double driveKS = 0.17; // TODO: This must be tuned to specific robot
-    public static final double driveKV = 0.92;
+    public static final double driveKS = 0.16; // TODO: This must be tuned to specific robot
+    public static final double driveKV = 0.93;
 
     public static final Slot0Configs intrinsicsD =
         new Slot0Configs().withKP(driveKP).withKD(driveKD).withKV(driveKV).withKS(driveKS);
@@ -170,7 +172,7 @@ public final class Constants {
 
     public static final double DRIVE_BASE_RADIUS =
         Math.sqrt(wheelBase * wheelBase / 4 + trackWidth * trackWidth / 4);
-    public static final double WheelRadius = 0;
+    public static final double WheelRadius = 0.0508;
     public static final LinearVelocity MaxFreeSpeed = null;
     public static final double odometryConstant = 0;
     public static final double maxAccel = 0;
@@ -178,5 +180,71 @@ public final class Constants {
     public static final double collisionMultiplier = 0.1;
     public static final double kAccel = 0.05;
     public static final double kMovement = 0.45;
+
+  }
+
+
+  public static class FieldConstants {
+    //BLUE
+
+
+    //reef
+    public static final Translation2d reefA = new Translation2d(0,0);
+    public static final Translation2d reefB = new Translation2d(0,0);
+
+    public static final Translation2d reefC = new Translation2d(0,0);
+    public static final Translation2d reefD = new Translation2d(0,0);
+
+    public static final Translation2d reefE = new Translation2d(0,0);
+    public static final Translation2d reefF = new Translation2d(0,0);
+
+    public static final Translation2d reefG = new Translation2d(0,0);
+    public static final Translation2d reefH = new Translation2d(0,0);
+
+    public static final Translation2d reefI = new Translation2d(0,0);
+    public static final Translation2d reefJ = new Translation2d(0,0);
+
+    public static final Translation2d reefK = new Translation2d(0,0);
+    public static final Translation2d reefL = new Translation2d(0,0);
+    public static final Pose2d RightSource_BLUE = null;
+    public static final Pose2d LeftSource_BLUE = null;
+
+    public static final Pose2d RightSource_RED = null;
+    public static final Pose2d LeftSource_RED = null;
+
+    
+
+
+
+
+  }
+
+
+  public static class ElevatorConstants {
+    public static final double kP = 0.1;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+    public static final double kV = 0.0;
+    public static final double kA = 0.0;
+    public static final double kS = 0.0;
+    public static final double kG = 0.0;
+    public static final double TargetAcceleration = 0;
+    public static final double TargetVelocity = 0;
+    //left when looking from back side (intake side)
+    public static final int IDLeft = 14;
+    public static final int IDRight = 13;
+
+
+  }
+
+  public static class WristConstants {
+    public static final int ID_Intake = 0;
+    public static final int ID_Pivot = 1;
+    public static final int ID_Wrist = 2;
+    public static final double rotorToSensorRatio = 0;
+    public static final double offsetPivot = 0;
+    public static final double AccelerationMotionMagic = 0;
+    public static final double CruisingVelocityMotionMagic = 0;
+
   }
 }

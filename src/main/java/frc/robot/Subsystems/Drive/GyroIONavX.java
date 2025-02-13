@@ -18,7 +18,7 @@ public class GyroIONavX implements GyroIO {
   private final BuiltInAccelerometer accelerometer = new BuiltInAccelerometer();
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
-  double rotation_offset = 0;
+  double rotation_offset = 58;
   // private final Queue<Double> jerkXQueue;
   // private final Queue<Double> jerkYQueue;
   private boolean resetHasntHappened = false;

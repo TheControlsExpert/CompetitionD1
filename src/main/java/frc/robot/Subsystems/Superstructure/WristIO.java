@@ -8,9 +8,11 @@ public interface WristIO {
     @AutoLog
     public static class WristIOInputs {
         public double wristAngle = 0.0;
-        public boolean wristZeroed = false;
+        //haven't reset
+        public boolean sensorBoolean = false;
+
         public double armAngle = 0.0;
-        public boolean reached_upper_limit = false; 
+        //public boolean reached_upper_limit = false; 
     }
 
 

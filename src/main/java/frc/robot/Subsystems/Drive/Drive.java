@@ -65,7 +65,7 @@ public class Drive extends SubsystemBase {
   
 
   public LinearFilter filter = LinearFilter.movingAverage(10);
-  public Pose2d estimatedPose = new Pose2d();
+  public Pose2d estimatedPose = new Pose2d(16.02, 6.29, new Rotation2d());
   public Pose2d odometryPose = new Pose2d();
   public Pose2d lastodometrypose = new Pose2d();
 
@@ -207,7 +207,7 @@ private final Field2d m_field = new Field2d();
           // Start odometry thread
           PhoenixOdometryThread.getInstance().start();
 
-             RobotConfig config;
+             RobotConfig config = null;
     try{
       config = RobotConfig.fromGUISettings();
     } catch (Exception e) {
@@ -215,34 +215,42 @@ private final Field2d m_field = new Field2d();
       e.printStackTrace();
     }
 
-    // Configure AutoBuilder last
-    AutoBuilder.configure(
-            this::getEstimatedPosition, // Robot pose supplier
+//     // Configure AutoBuilder last
+     AutoBuilder.configure(
+             this::getEstimatedPosition, // Robot pose supplier
             this::resetPosition, // Method to reset odometry (will be called if your auto has a starting pose)
             this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
-            ),
-            config, // The robot configuration
-            () -> {
-              // Boolean supplier that controls when the path will be mirrored for the red alliance
-              // This will flip the path being followed to the red side of the field.
-              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+            (speeds, feedforwards) -> runVelocity(speeds),
+             // Method that will drive the robot gn ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                    new PIDConstants(0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(0.1, 0.0, 0.0) // Rotation PID constants
+             ),
+             config, // The robot configuration
+             () -> {
+//               // Boolean supplier that controls when the path will be mirrored for the red alliance
+//               // This will flip the path being followed to the red side of the field.
+//               // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-              var alliance = DriverStation.getAlliance();
-              if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
+             var alliance = DriverStation.getAlliance();
+               if (alliance.isPresent()) {
+                 return alliance.get() == DriverStation.Alliance.Red;
               }
-              return false;
-            },
-            this // Reference to this subsystem to set requirements
-    );
-  }
-}
+               return false;
+             },
+             this // Reference to this subsystem to set requirements
+     );
+    // }
+ }
 
-          
+
+ 
+
+
+
+
+
+        
 
           
           
@@ -281,7 +289,7 @@ private final Field2d m_field = new Field2d();
           //             (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
           //         new SysIdRoutine.Mechanism(
           //             (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
-        }
+        
       
         @Override
         public void periodic() {
@@ -558,6 +566,15 @@ private final Field2d m_field = new Field2d();
   }
 
 
+  // public SwerveModuleState[] getModuleStates() {
+  //   SwerveModuleState[] states = new SwerveModuleState[4];
+  //   for (int i = 0; i < 4; i++) {
+  //     states[i] = modules[i].getState();
+  //   }
+  //   return states;
+  // }
+
+
 
   // public void setPose(Pose2d pose) {
   //   poseLock.lock();
@@ -644,6 +661,11 @@ private final Field2d m_field = new Field2d();
       return states;
     }
 
+
+    public ChassisSpeeds getRobotRelativeSpeeds() {
+      return kinematics.toChassisSpeeds(getModuleStates());
+    }
+
     private static Translation2d convertSwerveStateToVelocityVector(SwerveModuleState swerveModuleState) {
       return new Translation2d(swerveModuleState.speedMetersPerSecond, swerveModuleState.angle);
   }
@@ -709,18 +731,18 @@ private final Field2d m_field = new Field2d();
 
       poseLock.lock();
       //add smthn to make sure timestamp is in correct interval
-       //odom_pose_at_time = poseBuffer.getSample(timestamp).get();
+       odom_pose_at_time = poseBuffer.getSample(timestamp).get();
        //m_field.setRobotPose(odom_pose_at_time);
        
        //double[] stds_at_time_odom = {SDBufferX.getSample(timestamp).get(), SDBufferY.getSample(timestamp).get()};
       // SmartDashboard.putNumber("stds at time", stds_at_time_odom[0]);
 
-      // backwards_twist = odom_pose_at_time.minus(odometryPose);
+       backwards_twist = odom_pose_at_time.minus(odometryPose);
       // SmartDashboard.putNumber("length of transform", backwards_twist.getY());
 
        //double[] backward_std = {stds_at_time_odom[0] - stdX_odom, stds_at_time_odom[1] - stdY_odom};
 
-       //pose_at_time = new Pose2d(estimatedPose.getX() + backwards_twist.getX(), estimatedPose.getY() + backwards_twist.getY(), estimatedPose.getRotation());
+      pose_at_time = new Pose2d(estimatedPose.getX() + backwards_twist.getX(), estimatedPose.getY() + backwards_twist.getY(), estimatedPose.getRotation());
        
        //estimatedPose.transformBy(backwards_twist);
       
@@ -732,11 +754,11 @@ private final Field2d m_field = new Field2d();
 
       //Vector<N2> posVector = VecBuilder.fill(pose_at_time.getX(), pose_at_time.getY());
 
-       xval = (1/(1/Math.pow(stdX, 2) + 1/Math.pow(visionstds[0], 2))) * (1/Math.pow(stdX, 2) * estimatedPose.getX() + 1/Math.pow(visionstds[0],2) * pose.getX()); 
-       yval = (1/(1/Math.pow(stdY, 2) + 1/Math.pow(visionstds[1], 2))) * (1/Math.pow(stdY, 2) * estimatedPose.getY() + 1/Math.pow(visionstds[1],2) * pose.getY()); 
+       xval = (1/(1/Math.pow(stdX, 2) + 1/Math.pow(visionstds[0], 2))) * (1/Math.pow(stdX, 2) * pose_at_time.getX() + 1/Math.pow(visionstds[0],2) * pose.getX()); 
+       yval = (1/(1/Math.pow(stdY, 2) + 1/Math.pow(visionstds[1], 2))) * (1/Math.pow(stdY, 2) * pose_at_time.getY() + 1/Math.pow(visionstds[1],2) * pose.getY()); 
 
-      // forwardTransform = new Pose2d(xval, yval, pose_at_time.getRotation()).minus(pose_at_time);
-      estimatedPose = new Pose2d(xval, yval, estimatedPose.getRotation());
+       forwardTransform = new Pose2d(xval, yval, pose_at_time.getRotation()).minus(pose_at_time);
+      estimatedPose = estimatedPose.plus(forwardTransform);
 
 
        stdX = 1 / Math.sqrt(1/(visionstds[0] * visionstds[0]) + 1/(stdX * stdX));

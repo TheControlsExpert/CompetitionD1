@@ -16,12 +16,16 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.SwerveConstants.Mod0;
@@ -37,9 +41,13 @@ import frc.robot.Subsystems.Drive.ModuleIOTalonFX;
 import frc.robot.Subsystems.Vision.VisionIO_Limelight;
 import frc.robot.Subsystems.Vision.VisionSubsystem;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -50,10 +58,13 @@ import com.pathplanner.lib.auto.AutoBuilder;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  boolean isFlipped =
-    DriverStation.getAlliance().isPresent()
-        && DriverStation.getAlliance().get() == Alliance.Red;
+ private final PathConstraints constraints;
+  private Command pathfindingCommand;
 
+
+
+
+       
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
   private final AutoDriveCommand driver = new AutoDriveCommand(2, 0.03, 0, 1);
@@ -78,7 +89,20 @@ public class RobotContainer {
                 new ModuleIOTalonFX(Mod3.constants, 3));
        
 
-                VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
+        VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
+
+         constraints = new PathConstraints(
+          2.0, 4.0,
+          Units.degreesToRadians(400), Units.degreesToRadians(720));
+  
+  // Since AutoBuilder is configured, we can use it to build pathfinding commands
+   pathfindingCommand = AutoBuilder.pathfindToPose(
+          new Pose2d(16.30, 6.89, Rotation2d.fromDegrees(58)),
+          constraints,
+          0.0 // Goal end velocity in meters/sec
+        
+  );
+  
     // Set up SysId routines
     //autoChooser.addOption(
     //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
@@ -119,10 +143,30 @@ public class RobotContainer {
     
 drive.runVelocity(
     ChassisSpeeds.fromFieldRelativeSpeeds(
-      driver.getTargetSpeeds(drive.getEstimatedPosition(), new Pose2d(16.37, 7.04, Rotation2d.fromDegrees(58))),
+      driver.getTargetSpeeds(drive.getEstimatedPosition(), new Pose2d(16.30, 6.89, Rotation2d.fromDegrees(58))),
         isFlipped
             ? drive.getRotation().plus(new Rotation2d(Math.PI))
             : drive.getRotation())), drive));
+
+controller.x().whileTrue(pathfindingCommand);
+
+// controller.y().whileTrue(
+
+
+//       new SelectCommand<>(
+//           // Maps selector values to commands
+//           Map.ofEntries(
+//               Map.entry(CommandSelector.ONE, new PrintCommand("Command one was selected!")),
+//               Map.entry(CommandSelector.TWO, new PrintCommand("Command two was selected!")),
+//               Map.entry(CommandSelector.THREE, new PrintCommand("Command three was selected!"))),
+//           this::selectPathCommand));
+
+
+
+
+  
+
+
     
     
     
@@ -162,4 +206,84 @@ drive.runVelocity(
   public Command getAutonomousCommand() {
     return FeedforwardCharacterization.feedforwardCommand(drive);
 }
+
+
+
+
+public enum ScoringLevel {
+  L1,
+  L2,
+  L3,
+  L4
+}
+
+
+public enum ScoringPosition {
+  A,
+  B,
+  C,
+  D,
+  E,
+  F,
+  G,
+  H,
+  I,
+  J,
+  K,
+  L
+}
+
+
+// public enum ScoringCommand {
+//   OFFSET_STRAIGHT,
+//   CURVING
+// }
+
+public static Pose2d getScoringPose_w_offset() {
+  return PositionGetter.get()
+
+
+}
+
+
+public static Pose2d getScoringPose() {
+
+}
+
+
+// public ScoringCommand selectPathCommand() {
+
+//   //check if we are in zone for collision
+
+//   double[] positions = PositionGetter_offset.get(currentScoringCommand);
+//   double[] xyposition_goal = new double[2];
+//   double m;
+//   double b;
+
+//   if (DriverStation.getAlliance().get().equals(Alliance.Blue)) {
+//     xyposition_goal[0] = positions[0];
+//     xyposition_goal[1] = positions[1];
+
+//   }
+
+//   else {
+//     xyposition_goal[0] = positions[2];
+//     xyposition_goal[1] = positions[3];
+//   }
+
+//   m = (drive.getEstimatedPosition().getY() - xyposition_goal[1]) / (drive.getEstimatedPosition().getX() - xyposition_goal[0]);
+//   b = xyposition_goal[1] + m * xyposition_goal[0];
+
+
+
+
+
+
+
+
+
+
+
+
+// }
 }

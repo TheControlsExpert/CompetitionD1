@@ -12,7 +12,9 @@ public interface ElevatorIO {
     }
 
 
-    public default void setVelocity(double velocity) {}
+    public default void setPosition(double position) {}
+
+    public default void resetPosition() {}
 
    
     
