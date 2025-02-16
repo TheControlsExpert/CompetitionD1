@@ -139,14 +139,14 @@ public class RobotContainer {
             drive));
 
 
-    controller.a().whileTrue(Commands.run(() -> 
+//     controller.a().whileTrue(Commands.run(() -> 
     
-drive.runVelocity(
-    ChassisSpeeds.fromFieldRelativeSpeeds(
-      driver.getTargetSpeeds(drive.getEstimatedPosition(), new Pose2d(16.30, 6.89, Rotation2d.fromDegrees(58))),
-        isFlipped
-            ? drive.getRotation().plus(new Rotation2d(Math.PI))
-            : drive.getRotation())), drive));
+// drive.runVelocity(
+//     ChassisSpeeds.fromFieldRelativeSpeeds(
+//       driver.getTargetSpeeds(drive.getEstimatedPosition(), new Pose2d(16.30, 6.89, Rotation2d.fromDegrees(58))),
+//         isFlipped
+//             ? drive.getRotation().plus(new Rotation2d(Math.PI))
+//             : drive.getRotation())), drive));
 
 controller.x().whileTrue(pathfindingCommand);
 
@@ -239,16 +239,16 @@ public enum ScoringPosition {
 //   CURVING
 // }
 
-public static Pose2d getScoringPose_w_offset() {
-  return PositionGetter.get()
+// public static Pose2d getScoringPose_w_offset() {
+//   return PositionGetter.get()
 
 
-}
+// }
 
 
-public static Pose2d getScoringPose() {
+// public static Pose2d getScoringPose() {
 
-}
+// }
 
 
 // public ScoringCommand selectPathCommand() {

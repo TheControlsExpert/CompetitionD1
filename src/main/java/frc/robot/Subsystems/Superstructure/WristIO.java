@@ -12,22 +12,25 @@ public interface WristIO {
         public boolean sensorBoolean = false;
 
         public double armAngle = 0.0;
+
+        public double current = 0.0;
         //public boolean reached_upper_limit = false; 
     }
 
 
-    default void IntakeBox() {
+    default void updateInputs(WristIOInputs inputs) {
     }
 
-    default void IntakeGround() {
+    default void setWristPosition(double angle) {
     }
 
-    default void Score() {
+    default void setVerticalAngle(double angle) {
     }
 
-    default void setAngle(double angle) {
-
+    default void setOutputOpenLoop(double output) {
     }
+
+
 
     
 }

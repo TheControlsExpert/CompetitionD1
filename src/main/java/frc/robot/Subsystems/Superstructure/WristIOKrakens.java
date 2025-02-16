@@ -2,12 +2,17 @@ package frc.robot.Subsystems.Superstructure;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -23,9 +28,11 @@ public class WristIOKrakens implements WristIO {
     private DutyCycleEncoder armEncoder = new DutyCycleEncoder(0);
     //put actual port for it
     private DigitalInput limitSwitch = new DigitalInput(0);
+    private MotionMagicVoltage pivotMagicController = new MotionMagicVoltage(0);
 
    
-    private PositionVoltage positionRequester = new PositionVoltage(0);
+    //private PositionVoltage positionRequester = new PositionVoltage(0);
+    
 
      
     public WristIOKrakens() {
@@ -50,7 +57,18 @@ public class WristIOKrakens implements WristIO {
         //Turret Config
 
         SparkFlexConfig config_wrist = new SparkFlexConfig();
-       config_wristg_wrist.closedLoop.p(WristConstants.kP_wrist);
+        config_wrist.closedLoop.p(WristConstants.kP_wrist);
+        config_wrist.idleMode(IdleMode.kBrake);
+        config_wrist.inverted(false);
+
+        wristMotor.configure(config_wrist, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+        //intake config
+
+        armIntakeMotor.configure(new SparkFlexConfig().idleMode(IdleMode.kCoast).inverted(false), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+
+          
     
 
 
@@ -58,11 +76,28 @@ public class WristIOKrakens implements WristIO {
 
     public void updateInputs(WristIOInputs inputs) {
         inputs.armAngle = armEncoder.get();
-        inputs.sensorBoolean = se
+        inputs.sensorBoolean = limitSwitch.get();
+        inputs.wristAngle = wristMotor.getEncoder().getPosition();
+        inputs.current = armIntakeMotor.getOutputCurrent();
     }
 
-    public void setAngle(double angle) {
-        pivotMotor.setControl(positionRequester.withPosition(angle).withEnableFOC(true).withFeedForward());
+    public void setVerticalAngle(double angle) {
+        pivotMotor.setControl(pivotMagicController.withPosition(angle).withEnableFOC(true));
     }
+
+    public void setWristPosition(double angle) {
+        wristMotor.getClosedLoopController().setReference(angle, ControlType.kPosition);
+    }
+
+    public void setOutputOpenLoop(double output) {
+        //use to reset position
+        wristMotor.set(output);
+    }
+
+    public void setIntakeOutput(double output) {
+        armIntakeMotor.set(output);
+    }
+
+    
     
 }

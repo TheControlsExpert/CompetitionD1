@@ -233,6 +233,7 @@ public final class Constants {
     //left when looking from back side (intake side)
     public static final int IDLeft = 14;
     public static final int IDRight = 13;
+    public static final double toleranceElevator = 0;
 
 
   }
@@ -245,6 +246,22 @@ public final class Constants {
     public static final double offsetPivot = 0;
     public static final double AccelerationMotionMagic = 0;
     public static final double CruisingVelocityMotionMagic = 0;
+
+    public static final double kP = 0;
+    public static final double kG = 0;
+    public static final double kV = 0;
+    public static final double kA = 0;
+    public static final double kP_wrist = 0;
+    public static final double tolerancePivot = 0;
+    public static final double toleranceWrist = 0;
+
+
+  }
+
+
+  public static class IntakeConstants {
+
+    public static final double currentMax = 0;
 
   }
 }
