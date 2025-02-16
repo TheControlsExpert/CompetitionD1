@@ -29,6 +29,7 @@ public class Superstructure extends SubsystemBase {
     private SuperstructureState desired_state = SuperstructureState.HOME_UP_CORAL;
     private SuperstructureState current_state = SuperstructureState.INITIAL;
     private SuperstructureState next_state = SuperstructureState.HOME_UP_CORAL;
+    private SuperstructureState requestedState = SuperstructureState.HOME_UP_CORAL;
     private SuperstructureCommandInfo following_edge;
 
       private final Graph<SuperstructureState, SuperstructureCommandInfo> graph =
@@ -142,6 +143,7 @@ public class Superstructure extends SubsystemBase {
 
         if (isAtNode()) {
             current_state = next_state;
+            desired_state = requestedState;
             if (!current_state.equals(desired_state)) {
                 next_state = runSearch(current_state, desired_state).get();
                 following_edge = graph.getEdge(current_state, next_state);
@@ -215,16 +217,9 @@ public class Superstructure extends SubsystemBase {
             
         //add logic for manual mode  
 
-
-   
-   
-
-
-
-        
-        
-
 }
+
+
 
 
 
@@ -307,7 +302,9 @@ return Optional.of(nextState);
 
 
 public void setDesiredState(SuperstructureState state) {
-    this.desired_state = state;
+    if (runSearch(next_state, state).isPresent()) {
+    requestedState = state;
+}
 }
 
 public boolean hasCoral() {
