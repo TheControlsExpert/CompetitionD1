@@ -9,12 +9,13 @@ import frc.robot.Constants.FieldConstants;
 import frc.robot.RobotContainer.ScoringLevel;
 import frc.robot.RobotContainer.ScoringPosition;
 import frc.robot.Subsystems.Drive.PhoenixOdometryThread;
+import frc.robot.Subsystems.Superstructure.Superstructure;
 
 public class RobotState {
 
   public static RobotState instance;
     
-  public static ScoringLevel currentScoringLevel = ScoringLevel.L4;
+  public static Superstructure.SuperstructureState currentScoringLevel = Superstructure.SuperstructureState.L1_STOWED;
   public static ScoringPosition currentScoringCommand = ScoringPosition.A;
 
   public static HashMap< ScoringPosition, Pose2d[]> PositionGetter = new HashMap<>();
@@ -42,6 +43,13 @@ public class RobotState {
 
   public Pose2d[] getScoringPose_offset() {
     return PositionGetter_offset.get(currentScoringCommand);
+  }
+
+  public boolean isRobotFarEnough(Pose2d currentPose) {
+    Pose2d scoringPose = DriverStation.getAlliance().get() == Alliance.Blue ? getScoringPose()[0] : getScoringPose()[1];
+
+    return currentPose.getTranslation().minus(scoringPose.getTranslation()).getNorm() > 1;
+
   }
 
 

@@ -13,6 +13,8 @@ import org.jgrapht.graph.DefaultEdge;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotState;
+import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.WristConstants;
@@ -20,16 +22,17 @@ import frc.robot.Constants.WristConstants;
 public class Superstructure extends SubsystemBase {
     WristIO wristIO;
     ElevatorIO elevatorIO;
+    Drive drive;
 
     WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
     ElevatorIOInputsAutoLogged elevatorInputs = new ElevatorIOInputsAutoLogged();
     private boolean needsResetWrist;
 
 
-    private SuperstructureState desired_state = SuperstructureState.HOME_UP_CORAL;
+    private SuperstructureState desired_state = SuperstructureState.HOME_UP;
     private SuperstructureState current_state = SuperstructureState.INITIAL;
-    private SuperstructureState next_state = SuperstructureState.HOME_UP_CORAL;
-    private SuperstructureState requestedState = SuperstructureState.HOME_UP_CORAL;
+    private SuperstructureState next_state = SuperstructureState.HOME_UP;
+    private SuperstructureState requestedState = SuperstructureState.HOME_UP;
     private SuperstructureCommandInfo following_edge;
 
       private final Graph<SuperstructureState, SuperstructureCommandInfo> graph =
@@ -42,7 +45,8 @@ public class Superstructure extends SubsystemBase {
     private Alert needsResetAlert = new Alert("Wrist needs to be put in place", AlertType.kWarning);
 
 
-    public Superstructure(WristIOKrakens wristIO, ElevatorIOKrakens elevatorIO) {
+    public Superstructure(WristIOKrakens wristIO, ElevatorIOKrakens elevatorIO, Drive drive) {
+        this.drive = drive;
         this.wristIO = wristIO;
         this.elevatorIO = elevatorIO;
         wristIO.updateInputs(wristInputs);
@@ -56,53 +60,53 @@ public class Superstructure extends SubsystemBase {
 
       //edges going home-up no coral  
 
-      graph.addEdge(SuperstructureState.EJECT, SuperstructureState.HOME_UP_noCORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-      graph.addEdge(SuperstructureState.INITIAL, SuperstructureState.HOME_UP_noCORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(false)));
-      graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_UP_noCORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(false)));
+      graph.addEdge(SuperstructureState.EJECT, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.INITIAL, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(false)));
+      graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(false)));
 
-      graph.addEdge(SuperstructureState.L3_ALGAE, SuperstructureState.HOME_UP_noCORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-      graph.addEdge(SuperstructureState.L2_ALGAE, SuperstructureState.HOME_UP_noCORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-      graph.addEdge(SuperstructureState.GROUND_INTAKE, SuperstructureState.HOME_UP_noCORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.L3_ALGAE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.L2_ALGAE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.GROUND_INTAKE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
       
 
 
-      graph.addEdge(SuperstructureState.L1_EJECTED, SuperstructureState.HOME_UP_noCORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-      graph.addEdge(SuperstructureState.L2_EJECTED, SuperstructureState.HOME_UP_noCORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-      graph.addEdge(SuperstructureState.L3_EJECTED, SuperstructureState.HOME_UP_noCORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-      graph.addEdge(SuperstructureState.L4_EJECTED, SuperstructureState.HOME_UP_noCORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.L1_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.L2_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.L3_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.L4_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
 
 
       //edges going for scoring
 
       for (int i = 11; i < 15; i++) {
           graph.addEdge(SuperstructureState.values()[i], SuperstructureState.values()[i+4], new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(true)));
-          graph.addEdge(SuperstructureState.HOME_UP_CORAL, SuperstructureState.values()[i], new SuperstructureCommandInfo(i, i, i, Optional.empty(), Optional.of(true)));
-          graph.addEdge(SuperstructureState.values()[i], SuperstructureState.HOME_UP_CORAL, new SuperstructureCommandInfo(i, i, i, Optional.empty(), Optional.of(true)));
+          graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.values()[i], new SuperstructureCommandInfo(i, i, i, Optional.empty(), Optional.of(true)));
+          graph.addEdge(SuperstructureState.values()[i], SuperstructureState.HOME_UP, new SuperstructureCommandInfo(i, i, i, Optional.empty(), Optional.of(true)));
       }
 
       //going into intermediate 
 
       graph.addEdge(SuperstructureState.INTAKE, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(true)));
       graph.addEdge(SuperstructureState.HOME_DOWN, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(false)));
-      graph.addEdge(SuperstructureState.HOME_UP_noCORAL, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(false)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(false)));
 
       //going into home up coral
 
-      graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_UP_CORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(true)));
-      graph.addEdge(SuperstructureState.EJECT, SuperstructureState.HOME_UP_CORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(true)));
+      graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(true)));
+      graph.addEdge(SuperstructureState.EJECT, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(true)));
       
 
 
       //randoms 
 
-      graph.addEdge(SuperstructureState.HOME_UP_noCORAL, SuperstructureState.L3_ALGAE, new SuperstructureCommandInfo(0, 0, 0, Optional.of(true), Optional.of(false)));
-      graph.addEdge(SuperstructureState.HOME_UP_noCORAL, SuperstructureState.L2_ALGAE, new SuperstructureCommandInfo(0, 0, 0, Optional.of(true), Optional.of(false)));
-      graph.addEdge(SuperstructureState.HOME_UP_CORAL, SuperstructureState.RESET_WRIST, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(true)));
-      graph.addEdge(SuperstructureState.RESET_WRIST, SuperstructureState.HOME_UP_CORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(true)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L3_ALGAE, new SuperstructureCommandInfo(0, 0, 0, Optional.of(true), Optional.of(false)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L2_ALGAE, new SuperstructureCommandInfo(0, 0, 0, Optional.of(true), Optional.of(false)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.RESET_WRIST, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(true)));
+      graph.addEdge(SuperstructureState.RESET_WRIST, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.empty(), Optional.of(true)));
 
-      graph.addEdge(SuperstructureState.HOME_UP_CORAL, SuperstructureState.EJECT, new SuperstructureCommandInfo(0, 0, 0, Optional.of(true), Optional.of(true)));
-      graph.addEdge(SuperstructureState.GROUND_INTAKE, SuperstructureState.HOME_UP_CORAL, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(true)));
-      graph.addEdge(SuperstructureState.HOME_UP_noCORAL, SuperstructureState.GROUND_INTAKE, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.EJECT, new SuperstructureCommandInfo(0, 0, 0, Optional.of(true), Optional.of(true)));
+    //  graph.addEdge(SuperstructureState.GROUND_INTAKE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(true)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.GROUND_INTAKE, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
 
       graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_DOWN, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
 
@@ -142,6 +146,8 @@ public class Superstructure extends SubsystemBase {
         //are we scoring
 
         if (isAtNode()) {
+        
+          
             current_state = next_state;
             desired_state = requestedState;
             if (!current_state.equals(desired_state)) {
@@ -158,6 +164,13 @@ public class Superstructure extends SubsystemBase {
 
         else {
           //controlling code
+
+          //make sure we are far enough from reef (if necessary)
+
+          if ((current_state.equals(SuperstructureState.L1_EJECTED) || current_state.equals(SuperstructureState.L2_EJECTED) || current_state.equals(SuperstructureState.L3_EJECTED) || current_state.equals(SuperstructureState.L4_EJECTED) || current_state.equals(SuperstructureState.L2_ALGAE) || current_state.equals(SuperstructureState.L3_ALGAE)) && graph.getEdgeTarget(following_edge).equals(SuperstructureState.HOME_UP) && RobotState.getInstance().isRobotFarEnough(drive.getEstimatedPosition())) {
+           
+            
+          
 
           if (following_edge.elevatorFirst.isPresent()) {
 
@@ -191,31 +204,81 @@ public class Superstructure extends SubsystemBase {
           else {
 
             //move at the same time
+
+            if (!next_state.equals(SuperstructureState.INTERMEDIATE)) {
             
             wristIO.setVerticalAngle(following_edge.pivotPos);
             wristIO.setWristPosition(following_edge.wristAngle);
             elevatorIO.setPosition(following_edge.elevatorEncoderRots);
+            }
+
+            else {
+              elevatorIO.setPosition(following_edge.elevatorEncoderRots);
+            }
 
           }
 
 
         }
+      }
+
+        //hasCoral logic
 
 
-        if (current_state.equals(SuperstructureState.INTAKE) && wristInputs.current > IntakeConstants.currentMax) {
+        if (wristInputs.current > 45) {
           hasCoral = true;
         }
 
-        if (current_state.equals(SuperstructureState.EJECT) | 
-            current_state.equals(SuperstructureState.L1_EJECTED) |
-            current_state.equals(SuperstructureState.L2_EJECTED) |
-            current_state.equals(SuperstructureState.L3_EJECTED) |
-            current_state.equals(SuperstructureState.L4_EJECTED)) {
+        else {
           hasCoral = false;
-            }
+        }
+
+        //check to see if we are in a state that needs coral
+
+        // graph.edgesOf(current_state).stream().filter((command) -> )  (current_state);
+
+
+        // if ()
+
+        
+
+
+
       
             
-        //add logic for manual mode  
+        //add intaking/outtaking stuff here
+
+        if (current_state.equals(SuperstructureState.INTAKE) || current_state.equals(SuperstructureState.GROUND_INTAKE) && !hasCoral) {
+          wristIO.setOutputOpenLoop(0.6);
+          
+        }
+
+
+        else if (current_state.equals(SuperstructureState.EJECT)) {
+          wristIO.setOutputOpenLoop(-0.6);
+        }
+
+        else if ((current_state.equals(SuperstructureState.L1_EJECTED) || current_state.equals(SuperstructureState.L2_EJECTED) || current_state.equals(SuperstructureState.L3_EJECTED) || current_state.equals(SuperstructureState.L4_EJECTED)) 
+        ) {       
+          wristIO.setOutputOpenLoop(-0.2);
+        }
+
+        else if ((current_state.equals(SuperstructureState.L2_ALGAE) | current_state.equals(SuperstructureState.L3_ALGAE))  
+        ) {
+
+        }
+
+        else if (hasCoral) {
+          wristIO.setOutputOpenLoop(0.3);
+        }
+
+        
+        else {
+          wristIO.setOutputOpenLoop(0);
+        }
+
+
+
 
 }
 
@@ -314,7 +377,10 @@ public boolean hasCoral() {
 
 public boolean isEdgeAllowed(SuperstructureCommandInfo edge) {
   //can go on path bcs we have coral
-  return edge.requiresCoral.get().equals(hasCoral);
+ 
+
+  return edge.requiresCoral.get().equals(hasCoral) || graph.getEdgeTarget(edge).equals(SuperstructureState.HOME_UP);
+  
 
 }
 
@@ -323,8 +389,14 @@ public boolean isAtNode() {
   double offsetElevator =  Math.abs(graph.getEdge(current_state, next_state).elevatorEncoderRots - elevatorInputs.encoderRotations_L);
   double offsetPivot = Math.abs(graph.getEdge(current_state, next_state).pivotPos - wristInputs.armAngle);
   double offsetWrist = Math.abs(graph.getEdge(desired_state, current_state).wristAngle - wristInputs.wristAngle);
+  if (!next_state.equals(SuperstructureState.INTERMEDIATE)) {
 
   return ((offsetElevator < ElevatorConstants.toleranceElevator) && (offsetPivot < WristConstants.tolerancePivot) && (offsetWrist < WristConstants.toleranceWrist));
+  }
+
+  else {
+    return offsetElevator < ElevatorConstants.toleranceElevator;
+  }
 }
 
 
@@ -357,8 +429,8 @@ public static enum SuperstructureState {
   L3_ALGAE,
   L2_ALGAE,
   INITIAL,
-  HOME_UP_noCORAL,
-  HOME_UP_CORAL,
+  HOME_UP,
+  
   HOME_DOWN,
   INTERMEDIATE,
   GROUND_INTAKE,

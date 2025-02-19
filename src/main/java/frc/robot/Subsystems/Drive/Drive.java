@@ -65,7 +65,7 @@ public class Drive extends SubsystemBase {
   
 
   public LinearFilter filter = LinearFilter.movingAverage(10);
-  public Pose2d estimatedPose = new Pose2d(16.02, 6.29, new Rotation2d());
+  public Pose2d estimatedPose = new Pose2d(0, 0, new Rotation2d());
   public Pose2d odometryPose = new Pose2d();
   public Pose2d lastodometrypose = new Pose2d();
 

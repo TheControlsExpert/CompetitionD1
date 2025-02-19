@@ -35,9 +35,11 @@ import frc.robot.Constants.SwerveConstants.Mod3;
 import frc.robot.Commands.AutoDriveCommand;
 import frc.robot.Commands.DriveCommand;
 import frc.robot.Commands.FeedforwardCharacterization;
+import frc.robot.Commands.IntakingCommand;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Drive.GyroIONavX;
 import frc.robot.Subsystems.Drive.ModuleIOTalonFX;
+import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Vision.VisionIO_Limelight;
 import frc.robot.Subsystems.Vision.VisionSubsystem;
 
@@ -58,6 +60,7 @@ import com.pathplanner.lib.path.PathConstraints;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Intake intake; 
  private final PathConstraints constraints;
   private Command pathfindingCommand;
 
@@ -77,6 +80,7 @@ public class RobotContainer {
   
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+      this.intake = new Intake();
       this.gyro = new GyroIONavX();
     
         // Real robot, instantiate hardware IO implementations
@@ -149,6 +153,8 @@ public class RobotContainer {
 //             : drive.getRotation())), drive));
 
 controller.x().whileTrue(pathfindingCommand);
+controller.a().whileTrue(new IntakingCommand(intake));
+
 
 // controller.y().whileTrue(
 

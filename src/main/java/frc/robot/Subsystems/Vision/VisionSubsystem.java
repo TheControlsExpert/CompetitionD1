@@ -58,7 +58,7 @@ public class VisionSubsystem extends SubsystemBase{
 
         
         
-        drive.addVision(pose, timestamp, std);
+        //drive.addVision(pose, timestamp, std);
         }
        //field.setRobotPose(new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(-drive.getRotationLL())));
 

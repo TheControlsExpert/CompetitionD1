@@ -11,13 +11,17 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.RobotContainer;
 import frc.robot.RobotState;
 import frc.robot.Subsystems.Drive.Drive;
+import frc.robot.Subsystems.Superstructure.Superstructure;
+import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
 
 public class AutoScoreAimCommand extends Command {
     Drive drive;
+    Superstructure superstructure;
     private final AutoDriveCommand driver = new AutoDriveCommand(2, 0.03, 0, 1);
     private boolean hasGoneThroughCheckpoint = false;
     private Pose2d pastScoringPose = new Pose2d();
@@ -32,8 +36,10 @@ public class AutoScoreAimCommand extends Command {
     private DoubleSupplier rotationSupplier;
 
 
-    public AutoScoreAimCommand(Drive drive, CommandXboxController controller, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotationSupplier) {
+
+    public AutoScoreAimCommand(Drive drive, Superstructure superstructure, CommandXboxController controller, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotationSupplier) {
         this.drive = drive;
+        this.superstructure = superstructure;
         this.controller = controller;
         this.xSupplier = xSupplier;
         this.ySupplier = ySupplier;
@@ -60,6 +66,9 @@ public class AutoScoreAimCommand extends Command {
 
         if (pastScoringPose.equals(scoringPose) && hasGoneThroughCheckpoint) {
             //bcs we are close enough, make elevator go up now
+            
+            
+
 
             drive.runVelocity(
                ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -75,6 +84,7 @@ public class AutoScoreAimCommand extends Command {
 
             hasGoneThroughCheckpoint = false;
             //make elevator go down
+            superstructure.setDesiredState(SuperstructureState.HOME_UP);
             
 
             drive.runVelocity(
@@ -123,14 +133,29 @@ public class AutoScoreAimCommand extends Command {
                         : drive.getRotation()));
 
 
-            //add if we are close enough the elevator goes up            
+            //add if we are close enough the elevator goes up    
+
+            //Pose2d scoringPose_offset = DriverStation.getAlliance().get() == Alliance.Blue ? RobotState.getInstance().getScoringPose_offset()[0] : RobotState.getInstance().getScoringPose_offset()[1];
+            Pose2d scoringPose = DriverStation.getAlliance().get() == Alliance.Blue ? RobotState.getInstance().getScoringPose()[0] : RobotState.getInstance().getScoringPose()[1];
 
 
-    
+            if (scoringPose.minus(drive.getEstimatedPosition()).getTranslation().getNorm() < 0.50) {
+                hasGoneThroughCheckpoint = true;
+            }  
 
-        
+            if (hasGoneThroughCheckpoint && pastScoringPose.equals(scoringPose)) {
+                superstructure.setDesiredState(RobotState.getInstance().currentScoringLevel);
 
-       
+            }
+
+            else {
+                hasGoneThroughCheckpoint = false;
+                superstructure.setDesiredState(SuperstructureState.HOME_UP);
+
+
+            }
+
+            pastScoringPose = scoringPose;
 
     }
 
@@ -151,10 +176,12 @@ public class AutoScoreAimCommand extends Command {
     public void end(boolean interrupted) {
         if (controller.rightTrigger().getAsBoolean()) {
             //put scoring state logic here
+            CommandScheduler.getInstance().schedule(new ScoreCommand(superstructure));
         }
 
         else {
             //put homing state logic here
+            superstructure.setDesiredState(SuperstructureState.HOME_UP);
         }
         
     }

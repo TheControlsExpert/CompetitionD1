@@ -46,8 +46,8 @@ public final class Constants {
   public static class SwerveConstants {
 
     // Gear Ratio
-    public static final double driveReduction = 8.14;
-    public static final double steerReduction = 150 / 7;
+    public static final double driveReduction = 5.35;
+    public static final double steerReduction = 18.75;
 
     /* Steer Motor PID Values */
 
@@ -83,10 +83,10 @@ public final class Constants {
       public static final int driveMotorID = 2;
       public static final int angleMotorID = 1;
       public static final int canCoderID = 3;
-      public static final boolean invertDrive = false;
+      public static final boolean invertDrive = true;
       public static final boolean invertSteer = true;
       public static final boolean invertEncoder = false;
-      public static final double angleOffset = -0.088;
+      public static final double angleOffset = 0.440185546875;
       // 36.123046875 + 2.28515625)
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(
@@ -105,10 +105,10 @@ public final class Constants {
       public static final int angleMotorID = 4;
       public static final int canCoderID = 6;
       public static final boolean invertDrive = false;
-      public static final boolean invertSteer = false;
+      public static final boolean invertSteer = true;
       public static final boolean invertEncoder = false;
 
-      public static final double angleOffset = -0.309082;
+      public static final double angleOffset = 0.360107;
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(
               driveMotorID,
@@ -125,10 +125,10 @@ public final class Constants {
       public static final int driveMotorID = 8;
       public static final int angleMotorID = 7;
       public static final int canCoderID = 9;
-      public static final boolean invertDrive = false;
+      public static final boolean invertDrive = true;
       public static final boolean invertSteer = true;
       public static final boolean invertEncoder = false;
-      public static final double angleOffset = 0.367;
+      public static final double angleOffset =  0.200703125;
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(
               driveMotorID,
@@ -145,10 +145,11 @@ public final class Constants {
       public static final int driveMotorID = 11;
       public static final int angleMotorID = 10;
       public static final int canCoderID = 12;
-      public static final boolean invertDrive = true;
+      public static final boolean invertDrive = false;
       public static final boolean invertSteer = true;
       public static final boolean invertEncoder = false;
-      public static final double angleOffset = -0.17749;
+      public static final double angleOffset = 0.466;
+      ;
       // -120.937
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(
@@ -233,7 +234,7 @@ public final class Constants {
     //left when looking from back side (intake side)
     public static final int IDLeft = 14;
     public static final int IDRight = 13;
-    public static final double toleranceElevator = 0;
+    public static final double toleranceElevator = 1;
 
 
   }
@@ -252,8 +253,8 @@ public final class Constants {
     public static final double kV = 0;
     public static final double kA = 0;
     public static final double kP_wrist = 0;
-    public static final double tolerancePivot = 0;
-    public static final double toleranceWrist = 0;
+    public static final double tolerancePivot = 1;
+    public static final double toleranceWrist = 1;
 
 
   }

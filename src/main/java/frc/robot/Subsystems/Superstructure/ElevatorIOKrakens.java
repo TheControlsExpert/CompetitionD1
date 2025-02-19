@@ -9,16 +9,20 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorIOKrakens implements ElevatorIO {
-        TalonFX krakenLeft = new TalonFX(ElevatorConstants.IDLeft, "rio");
-        TalonFX krakenRight = new TalonFX(ElevatorConstants.IDRight, "rio");
+        TalonFX motorL = new TalonFX(13, "rio");
+        TalonFX motorR = new TalonFX(14, "rio");
         //SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(ElevatorConstants.kS, ElevatorConstants.kV, 0);
         // VelocityVoltage velocityRequester = new VelocityVoltage(0);
         final MotionMagicVoltage mm_request = new MotionMagicVoltage(0);
@@ -28,52 +32,65 @@ public class ElevatorIOKrakens implements ElevatorIO {
 
     public ElevatorIOKrakens() {
         TalonFXConfiguration configL = new TalonFXConfiguration();
-        Slot0Configs slot0 = new Slot0Configs().withKV(ElevatorConstants.kV).withKG(ElevatorConstants.kG).withKP(ElevatorConstants.kP).withKA(ElevatorConstants.kA); 
+        Slot0Configs slot0 = new Slot0Configs().withKV(0.11).withKS(0.0155* 12 ).withKG(0.0265 * 12).withKP(0.03).withKA(0).withGravityType(GravityTypeValue.Elevator_Static);
+        
         var motionMagicConfigs = configL.MotionMagic;
-        motionMagicConfigs.MotionMagicAcceleration = ElevatorConstants.TargetAcceleration;
-        motionMagicConfigs.MotionMagicCruiseVelocity = ElevatorConstants.TargetVelocity;
+        motionMagicConfigs.MotionMagicAcceleration = 40;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 30;
         configL.Slot0 = slot0;
         configL.MotorOutput.NeutralMode = NeutralModeValue.Brake;  
+        configL.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         
-        krakenLeft.getConfigurator().apply(configL);
+        
+        motorL.getConfigurator().apply(configL);
 
+      
+      
+      
         TalonFXConfiguration configR = new TalonFXConfiguration();
         configR.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
         //tune this to the bot
-        configR.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        krakenRight.getConfigurator().apply(configR);
-        krakenRight.setControl(new StrictFollower(ElevatorConstants.IDLeft));
+        configR.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        motorR.getConfigurator().apply(configR);
+        motorR.setControl(new StrictFollower(13));
+        SparkFlexConfig config = new SparkFlexConfig();
+        config.idleMode(IdleMode.kBrake);
+        config.apply(new ClosedLoopConfig().p(0.000));
+       // config.
+        motorL.setPosition(0);
+        motorR.setPosition(0);
+      
     }
 
 
 
     @Override
     public void updateInputs(ElevatorIOInputs inputs) {
-        inputs.encoderRotations_L = krakenLeft.getPosition().getValueAsDouble();
+        inputs.encoderRotations_L = motorR.getPosition().getValueAsDouble();
         encoderPos = inputs.encoderRotations_L;
         
-        inputs.currentOutput_L = krakenLeft.getStatorCurrent().getValueAsDouble();
+        inputs.currentOutput_L = motorR.getStatorCurrent().getValueAsDouble();
     }
 
 
     @Override
     public void setPosition(double position) {
         //assumes positive voltage results in moving up
-        krakenLeft.setControl(mm_request.withPosition(position).withEnableFOC(true));
+        motorL.setControl(mm_request.withPosition(position));
         
 
         
     }
 
     public void stop() {
-        krakenLeft.setControl(new DutyCycleOut(0));
+        motorL.setControl(new DutyCycleOut(0.03));
     }
 
 
     public void resetPosition() {
-        krakenLeft.setPosition(0);
-        krakenRight.setPosition(0);
+        motorL.setPosition(0);
+        motorR.setPosition(0);
 
     }
 
