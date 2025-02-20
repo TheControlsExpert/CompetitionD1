@@ -33,6 +33,8 @@ import frc.robot.Constants.SwerveConstants.Mod1;
 import frc.robot.Constants.SwerveConstants.Mod2;
 import frc.robot.Constants.SwerveConstants.Mod3;
 import frc.robot.Commands.AutoDriveCommand;
+import frc.robot.Commands.AutoScoreAimCommand;
+import frc.robot.Commands.AutoSourcingCommand;
 import frc.robot.Commands.DriveCommand;
 import frc.robot.Commands.FeedforwardCharacterization;
 import frc.robot.Commands.IntakingCommand;
@@ -40,6 +42,9 @@ import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Drive.GyroIONavX;
 import frc.robot.Subsystems.Drive.ModuleIOTalonFX;
 import frc.robot.Subsystems.Intake.Intake;
+import frc.robot.Subsystems.Superstructure.ElevatorIOKrakens;
+import frc.robot.Subsystems.Superstructure.Superstructure;
+import frc.robot.Subsystems.Superstructure.WristIOKrakens;
 import frc.robot.Subsystems.Vision.VisionIO_Limelight;
 import frc.robot.Subsystems.Vision.VisionSubsystem;
 
@@ -71,6 +76,7 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
   private final AutoDriveCommand driver = new AutoDriveCommand(2, 0.03, 0, 1);
+  Superstructure superstructure;
   
     private GyroIONavX gyro;
     
@@ -91,6 +97,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(Mod1.constants, 1),
                 new ModuleIOTalonFX(Mod2.constants, 2),
                 new ModuleIOTalonFX(Mod3.constants, 3));
+
+        superstructure = new Superstructure(new WristIOKrakens(), new ElevatorIOKrakens(), drive);        
        
 
         VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
@@ -153,7 +161,8 @@ public class RobotContainer {
 //             : drive.getRotation())), drive));
 
 controller.x().whileTrue(pathfindingCommand);
-controller.a().whileTrue(new IntakingCommand(intake));
+
+controller.y().whileTrue(new AutoSourcingCommand(drive, superstructure, intake, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
 
 // controller.y().whileTrue(

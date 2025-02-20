@@ -28,7 +28,7 @@ public class Intake extends SubsystemBase{
     //---------------------------------------------------------Motors spining speeds--------------------------------------------------------
     public void before_first(){
         
-        funnel.set(0.15);
+        funnel.set(-0.1);
         BoxMotor.set(0.0);
         
     }
@@ -74,18 +74,23 @@ public class Intake extends SubsystemBase{
     @Override
     public void periodic() {
         SmartDashboard.putString("State", CurrentintakeState.toString());
-        if (CurrentintakeState.equals(Intake_states.Bofore_First) && !DistanceSensorOne.get()){
+         if (CurrentintakeState.equals(Intake_states.Bofore_First) && !DistanceSensorOne.get()) {
             CurrentintakeState = Intake_states.After_First; 
             // here we need to turn off the blue wheels spin the ninja stars and get the elevator up
         
         }
+        // if (CurrentintakeState.equals(Intake_states.Bofore_First) && !DistanceSensorOne.get()){
+        //     CurrentintakeState = Intake_states.After_First; 
+        //     // here we need to turn off the blue wheels spin the ninja stars and get the elevator up
+        
+        // }
 
 
         else if (CurrentintakeState.equals(Intake_states.Intermediate) && !DistanceSensorThree.get() && !DistanceSensorTwo.get()) {
             CurrentintakeState = Intake_states.Ready;
             // here we need to stop the ninja stars and the elevator
         }
-        else if (CurrentintakeState.equals(Intake_states.Ready) && DistanceSensorTwo.get() && DistanceSensorOne.get()) {
+        else if (CurrentintakeState.equals(Intake_states.Ready) && DistanceSensorTwo.get() && (DistanceSensorTwo.get() | DistanceSensorThree.get())) {
             CurrentintakeState = Intake_states.Empty;
             // here we need to stop the ninja stars and the elevator
         }

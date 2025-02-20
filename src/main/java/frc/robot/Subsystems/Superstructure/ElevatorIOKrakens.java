@@ -18,14 +18,18 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.util.CTREDoubleProfilerElevator;
 
 public class ElevatorIOKrakens implements ElevatorIO {
         TalonFX motorL = new TalonFX(13, "rio");
         TalonFX motorR = new TalonFX(14, "rio");
+        double setpointPosition = 2;
         //SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(ElevatorConstants.kS, ElevatorConstants.kV, 0);
         // VelocityVoltage velocityRequester = new VelocityVoltage(0);
         final MotionMagicVoltage mm_request = new MotionMagicVoltage(0);
+         CTREDoubleProfilerElevator profiler = new CTREDoubleProfilerElevator(motorL);
         double encoderPos = 0.0;
         
 
@@ -76,8 +80,13 @@ public class ElevatorIOKrakens implements ElevatorIO {
 
     @Override
     public void setPosition(double position) {
-        //assumes positive voltage results in moving up
-        motorL.setControl(mm_request.withPosition(position));
+        if (DriverStation.isEnabled()) {
+        // setpointPosition = position;
+        // //assumes positive voltage results in moving up
+        // motorL.setControl(mm_request.withPosition(setpointPosition));
+
+        profiler.runProfile(position, mm_request);
+        }
         
 
         

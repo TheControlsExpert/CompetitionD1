@@ -15,7 +15,7 @@ public class ScoreCommand extends Command {
 
     @Override
     public void initialize() {
-        superstructure.setDesiredState(RobotState.getInstance().currentScoringLevel);
+        superstructure.setDesiredState(SuperstructureState.L4_EJECTED);
     }
 
     @Override
@@ -26,7 +26,7 @@ public class ScoreCommand extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        superstructure.setDesiredState(SuperstructureState.HOME_UP);
+        //superstructure.setDesiredState(SuperstructureState.HOME_UP);
     }
 
     

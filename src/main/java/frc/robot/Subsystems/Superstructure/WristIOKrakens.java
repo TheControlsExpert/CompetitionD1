@@ -1,112 +1,142 @@
-// package frc.robot.Subsystems.Superstructure;
+package frc.robot.Subsystems.Superstructure;
 
-// import com.ctre.phoenix6.configs.Slot0Configs;
-// import com.ctre.phoenix6.configs.TalonFXConfiguration;
-// import com.ctre.phoenix6.controls.MotionMagicVoltage;
-// import com.ctre.phoenix6.controls.PositionVoltage;
-// import com.ctre.phoenix6.hardware.TalonFX;
-// import com.ctre.phoenix6.signals.GravityTypeValue;
-// import com.ctre.phoenix6.signals.NeutralModeValue;
-// import com.revrobotics.spark.SparkFlex;
-// import com.revrobotics.spark.SparkBase.ControlType;
-// import com.revrobotics.spark.SparkBase.PersistMode;
-// import com.revrobotics.spark.SparkBase.ResetMode;
-// import com.revrobotics.spark.SparkLowLevel.MotorType;
-// import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-// import com.revrobotics.spark.config.SparkFlexConfig;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
-// import edu.wpi.first.math.controller.ProfiledPIDController;
-// import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-// import edu.wpi.first.wpilibj.DigitalInput;
-// import edu.wpi.first.wpilibj.DutyCycleEncoder;
-// import edu.wpi.first.wpilibj.Encoder;
-// import frc.robot.Constants.WristConstants;
-// import frc.robot.util.DoubleProfilerArmNeo;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.WristConstants;
+import frc.robot.util.DoubleProfilerArmNeo;
 
-// public class WristIOKrakens implements WristIO {
-//     private SparkFlex pivotMotor = new SparkFlex(WristConstants.ID_Pivot, MotorType.kBrushless);
-//     private SparkFlex wristMotor = new SparkFlex(WristConstants.ID_Wrist, MotorType.kBrushless);
-//     private SparkFlex armIntakeMotor = new SparkFlex(WristConstants.ID_Intake, MotorType.kBrushless);
-//     //make sure channel match roborio channels
-//     private DutyCycleEncoder armEncoder = new DutyCycleEncoder(0);
-//     //put actual port for it
-//     private DigitalInput limitSwitch = new DigitalInput(0);
-    
-//     ProfiledPIDController profiler_racial = new ProfiledPIDController(0.005, 0, 0, new Constraints(300 * 10/60, 200 * 6/60));
-//     DoubleProfilerArmNeo profiler_new = new DoubleProfilerArmNeo(profiler_racial, pivotMotor);
+public class WristIOKrakens implements WristIO {
+    private SparkFlex pivotMotor = new SparkFlex(15, MotorType.kBrushless);
+    private SparkFlex wristMotor = new SparkFlex(16, MotorType.kBrushless);
+    private SparkFlex armIntakeMotor = new SparkFlex(17, MotorType.kBrushless);
+    //make sure channel match roborio channels
+    private DutyCycleEncoder armEncoder = new DutyCycleEncoder(0);
+    //put actual port for it
+   // private DigitalInput limitSwitch = new DigitalInput(0);
+    double setpointangle = 17.5;
+    ProfiledPIDController profiler_racial = new ProfiledPIDController(0.005, 0, 0, new Constraints(300 * 10/60, 200 * 6/60));
+    DoubleProfilerArmNeo profiler_new = new DoubleProfilerArmNeo(profiler_racial, pivotMotor);
 
 
 
-//     double kv = 0.003;
-//     double ks = 0.017;
-//     double offset = 0.455;
-//     double kg = 0.019;
+    double kv = 0.003;
+    double ks = 0.017;
+    double offset = 0.455;
+    double kg = 0.019;
 
    
-//     //private PositionVoltage positionRequester = new PositionVoltage(0);
+    //private PositionVoltage positionRequester = new PositionVoltage(0);
     
 
      
-//     public WristIOKrakens() {
-//         //PIVOT CONFIG
+    public WristIOKrakens() {
+        //PIVOT CONFIG
 
-//         //change based on bot
-//         armEncoder.setInverted(true);
-//         double initPos = armEncoder.get();
-//         Slot0Configs slot0Configs = new Slot0Configs().withGravityType(GravityTypeValue.Arm_Cosine).withKP(WristConstants.kP).withKG(WristConstants.kG).withKV(WristConstants.kV).withKA(WristConstants.kA);
-//         TalonFXConfiguration config_pivot = new TalonFXConfiguration();
-//         config_pivot.Slot0 = slot0Configs;
-//         config_pivot.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-//         config_pivot.Feedback.RotorToSensorRatio = WristConstants.rotorToSensorRatio;
-//         config_pivot.MotionMagic.MotionMagicAcceleration = WristConstants.AccelerationMotionMagic;
-//         config_pivot.MotionMagic.MotionMagicCruiseVelocity = WristConstants.CruisingVelocityMotionMagic;
+        //change based on bot
 
-      
+        SparkFlexConfig config = new SparkFlexConfig();
+        config.idleMode(IdleMode.kBrake);
+        config.apply(new ClosedLoopConfig().p(0.000));
+       // config.
 
-//         //Turret Config
 
-//         SparkFlexConfig config_wrist = new SparkFlexConfig();
-//         config_wrist.closedLoop.p(WristConstants.kP_wrist);
-//         config_wrist.idleMode(IdleMode.kBrake);
-//         config_wrist.inverted(false);
+        pivotMotor.configure(config, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-//         wristMotor.configure(config_wrist, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        pivotMotor.getEncoder().setPosition((armEncoder.get() - offset) * 75);
+       
 
-//         //intake config
+       
 
-//         armIntakeMotor.configure(new SparkFlexConfig().idleMode(IdleMode.kCoast).inverted(false), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        //Turret Config
+
+        SparkFlexConfig config_wrist = new SparkFlexConfig();
+        config_wrist.closedLoop.p(WristConstants.kP_wrist);
+        config_wrist.idleMode(IdleMode.kBrake);
+        config_wrist.inverted(false);
+
+        wristMotor.configure(config_wrist, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+        //intake config
+
+        armIntakeMotor.configure(new SparkFlexConfig().idleMode(IdleMode.kCoast).inverted(false), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
 
           
     
 
 
-//     }
+    }
 
-//     public void updateInputs(WristIOInputs inputs) {
-//         inputs.armAngle = armEncoder.get();
-//         inputs.sensorBoolean = limitSwitch.get();
-//         inputs.wristAngle = wristMotor.getEncoder().getPosition();
-//         inputs.current = armIntakeMotor.getOutputCurrent();
-//     }
+    public void updateInputs(WristIOInputs inputs) {
 
-//     public void setVerticalAngle(double angle) {
-//         pivotMotor.setControl(pivotMagicController.withPosition(angle).withEnableFOC(true));
-//     }
+        inputs.armAngle = pivotMotor.getEncoder().getPosition();
+        //inputs.sensorBoolean = limitSwitch.get();
+        inputs.wristAngle = wristMotor.getEncoder().getPosition();
+        inputs.current = armIntakeMotor.getOutputCurrent();
 
-//     public void setWristPosition(double angle) {
-//         wristMotor.getClosedLoopController().setReference(angle, ControlType.kPosition);
-//     }
+        SmartDashboard.putNumber("Arm current", inputs.current);
 
-//     public void setOutputOpenLoop(double output) {
-//         //use to reset position
-//         wristMotor.set(output);
-//     }
+        SmartDashboard.putNumber("Arm Angle Theoretical", inputs.armAngle);
+        SmartDashboard.putNumber("Arm angle actual", pivotMotor.getEncoder().getPosition());
 
-//     public void setIntakeOutput(double output) {
-//         armIntakeMotor.set(output);
-//     }
+        double setpoint = profiler_racial.calculate(pivotMotor.getEncoder().getPosition(), setpointangle);
+        double setpoint2 = profiler_new.calculate(setpointangle);
+   
+    SmartDashboard.putNumber("setpoint",  profiler_racial.getSetpoint().velocity * 60 );
+    SmartDashboard.putNumber("setpoint angle is act set", setpointangle );
+   // SmartDashboard.putNumber("velocity pivot",  pivot.getEncoder().getVelocity());
+   
+       //  motorL.set(0.05);
+        pivotMotor.getClosedLoopController().setReference(profiler_racial.getSetpoint().velocity * 60, ControlType.kVelocity, ClosedLoopSlot.kSlot0, 12 * (Math.signum(profiler_racial.getSetpoint().velocity) * ks)  +  12 * (kg * Math.cos(Units.rotationsToRadians(armEncoder.get() - offset))) + kv * profiler_racial.getSetpoint().velocity * 60 + setpoint, ArbFFUnits.kVoltage);
+
+    }
+
+    public void setVerticalAngle(double angle) {
+
+        setpointangle = angle;
+      
+        // motorL.setControl(velocitycreator.withPosition(i));
+        // pivot.set(i);
+   
+        //motorL.set(0.3);
+    }
+
+    public void setWristPosition(double angle) {
+       // wristMotor.getClosedLoopController().setReference(angle, ControlType.kPosition);
+    }
+
+    public void setOutputOpenLoop(double output) {
+        //use to reset position
+        armIntakeMotor.set(output);
+    }
+
+    public void setIntakeOutput(double output) {
+        armIntakeMotor.set(output);
+    }
 
     
     
-// }
+}

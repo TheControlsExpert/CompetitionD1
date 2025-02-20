@@ -96,6 +96,8 @@ public class Robot extends TimedRobot {
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
 
+    
+
   }
 
   @Override

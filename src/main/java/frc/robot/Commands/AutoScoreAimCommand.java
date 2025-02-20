@@ -35,6 +35,7 @@ public class AutoScoreAimCommand extends Command {
     private DoubleSupplier ySupplier;
     private DoubleSupplier rotationSupplier;
 
+    private boolean should_auto_align = false;
 
 
     public AutoScoreAimCommand(Drive drive, Superstructure superstructure, CommandXboxController controller, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotationSupplier) {
@@ -50,7 +51,7 @@ public class AutoScoreAimCommand extends Command {
 
     @Override
     public void initialize() {
-        
+        superstructure.setDesiredState(SuperstructureState.L4_STOWED);
 
     }
 
@@ -58,7 +59,7 @@ public class AutoScoreAimCommand extends Command {
     public void execute() {
     //auto-align
 
-    if (Math.hypot(Math.hypot(xSupplier.getAsDouble(), ySupplier.getAsDouble()), rotationSupplier.getAsDouble()) < 0.26) {
+    if (Math.hypot(Math.hypot(xSupplier.getAsDouble(), ySupplier.getAsDouble()), rotationSupplier.getAsDouble()) < 0.26 && should_auto_align) {
 
     
         Pose2d scoringPose = DriverStation.getAlliance().get() == Alliance.Blue ? RobotState.getInstance().getScoringPose()[0] : RobotState.getInstance().getScoringPose()[1];
@@ -133,29 +134,29 @@ public class AutoScoreAimCommand extends Command {
                         : drive.getRotation()));
 
 
-            //add if we are close enough the elevator goes up    
+            ////add if we are close enough the elevator goes up    
 
-            //Pose2d scoringPose_offset = DriverStation.getAlliance().get() == Alliance.Blue ? RobotState.getInstance().getScoringPose_offset()[0] : RobotState.getInstance().getScoringPose_offset()[1];
-            Pose2d scoringPose = DriverStation.getAlliance().get() == Alliance.Blue ? RobotState.getInstance().getScoringPose()[0] : RobotState.getInstance().getScoringPose()[1];
-
-
-            if (scoringPose.minus(drive.getEstimatedPosition()).getTranslation().getNorm() < 0.50) {
-                hasGoneThroughCheckpoint = true;
-            }  
-
-            if (hasGoneThroughCheckpoint && pastScoringPose.equals(scoringPose)) {
-                superstructure.setDesiredState(RobotState.getInstance().currentScoringLevel);
-
-            }
-
-            else {
-                hasGoneThroughCheckpoint = false;
-                superstructure.setDesiredState(SuperstructureState.HOME_UP);
+            ////Pose2d scoringPose_offset = DriverStation.getAlliance().get() == Alliance.Blue ? RobotState.getInstance().getScoringPose_offset()[0] : RobotState.getInstance().getScoringPose_offset()[1];
+            // Pose2d scoringPose = DriverStation.getAlliance().get() == Alliance.Blue ? RobotState.getInstance().getScoringPose()[0] : RobotState.getInstance().getScoringPose()[1];
 
 
-            }
+            // if (scoringPose.minus(drive.getEstimatedPosition()).getTranslation().getNorm() < 0.50) {
+            //     hasGoneThroughCheckpoint = true;
+            // }  
 
-            pastScoringPose = scoringPose;
+            // if (hasGoneThroughCheckpoint && pastScoringPose.equals(scoringPose)) {
+            //     superstructure.setDesiredState(RobotState.getInstance().currentScoringLevel);
+
+            // }
+
+            // else {
+            //     hasGoneThroughCheckpoint = false;
+            //     superstructure.setDesiredState(SuperstructureState.HOME_UP);
+
+
+            // }
+
+            // pastScoringPose = scoringPose;
 
     }
 

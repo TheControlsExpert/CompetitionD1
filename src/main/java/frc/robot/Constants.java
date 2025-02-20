@@ -234,7 +234,7 @@ public final class Constants {
     //left when looking from back side (intake side)
     public static final int IDLeft = 14;
     public static final int IDRight = 13;
-    public static final double toleranceElevator = 1;
+    public static final double toleranceElevator = 2.0;
 
 
   }
