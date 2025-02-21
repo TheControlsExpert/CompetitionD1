@@ -47,7 +47,7 @@ public class DoubleProfilerArmNeo {
         }
         lastResetTime  = Timer.getFPGATimestamp();
 
-        if (Timer.getFPGATimestamp() - initTime > 4 && Math.abs(motor.getEncoder().getPosition() - setpoint) > 2) {
+        if (Timer.getFPGATimestamp() - initTime > 4 && Math.abs(motor.getEncoder().getPosition() - setpoint) > 1) {
             initiate();
         }
 

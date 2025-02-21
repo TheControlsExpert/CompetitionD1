@@ -86,7 +86,7 @@ public final class Constants {
       public static final boolean invertDrive = true;
       public static final boolean invertSteer = true;
       public static final boolean invertEncoder = false;
-      public static final double angleOffset = 0.440185546875;
+      public static final double angleOffset = 0.384;
       // 36.123046875 + 2.28515625)
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(
@@ -234,7 +234,7 @@ public final class Constants {
     //left when looking from back side (intake side)
     public static final int IDLeft = 14;
     public static final int IDRight = 13;
-    public static final double toleranceElevator = 2.0;
+    public static final double toleranceElevator = 1;
 
 
   }

@@ -45,6 +45,7 @@ import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Superstructure.ElevatorIOKrakens;
 import frc.robot.Subsystems.Superstructure.Superstructure;
 import frc.robot.Subsystems.Superstructure.WristIOKrakens;
+import frc.robot.Subsystems.Superstructure.Superstructure.ManualMode;
 import frc.robot.Subsystems.Vision.VisionIO_Limelight;
 import frc.robot.Subsystems.Vision.VisionSubsystem;
 
@@ -66,6 +67,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Intake intake; 
+
  private final PathConstraints constraints;
   private Command pathfindingCommand;
 
@@ -86,7 +88,7 @@ public class RobotContainer {
   
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-      this.intake = new Intake();
+     this.intake = new Intake();
       this.gyro = new GyroIONavX();
     
         // Real robot, instantiate hardware IO implementations
@@ -101,7 +103,7 @@ public class RobotContainer {
         superstructure = new Superstructure(new WristIOKrakens(), new ElevatorIOKrakens(), drive);        
        
 
-        VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
+      //  VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
 
          constraints = new PathConstraints(
           2.0, 4.0,
@@ -160,10 +162,11 @@ public class RobotContainer {
 //             ? drive.getRotation().plus(new Rotation2d(Math.PI))
 //             : drive.getRotation())), drive));
 
-controller.x().whileTrue(pathfindingCommand);
+//controller.x().whileTrue(pathfindingCommand);
 
 controller.y().whileTrue(new AutoSourcingCommand(drive, superstructure, intake, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
-
+controller.a().whileTrue(new AutoScoreAimCommand(drive, superstructure, controller, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+//controller.
 
 // controller.y().whileTrue(
 

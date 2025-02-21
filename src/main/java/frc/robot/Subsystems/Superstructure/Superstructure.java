@@ -1,5 +1,6 @@
 package frc.robot.Subsystems.Superstructure;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -28,6 +29,7 @@ public class Superstructure extends SubsystemBase {
     WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
     ElevatorIOInputsAutoLogged elevatorInputs = new ElevatorIOInputsAutoLogged();
     private boolean needsResetWrist;
+    private ManualMode manualMode = ManualMode.AUTOMATIC;
 
 
     private SuperstructureState desired_state = SuperstructureState.HOME_UP;
@@ -38,7 +40,10 @@ public class Superstructure extends SubsystemBase {
       private final Graph<SuperstructureState, SuperstructureCommandInfo> graph =
     new DefaultDirectedGraph<>(SuperstructureCommandInfo.class);
 
-    private boolean hasCoral = true;
+    public boolean hasCoral = false;
+
+    public ManualMode DesiredManualMode = ManualMode.AUTOMATIC;
+    //public HashMap<double[], SuperstructureState> manualModeTransitions = new HashMap<double[] , SuperstructureState>();
     
  
 
@@ -58,6 +63,8 @@ public class Superstructure extends SubsystemBase {
           graph.addVertex(state);
         }
 
+      //add double arrays to hashmap corresponding to each state
+
       //edges going home-up no coral  
 
       graph.addEdge(SuperstructureState.EJECT, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
@@ -73,7 +80,7 @@ public class Superstructure extends SubsystemBase {
      // graph.addEdge(SuperstructureState.L1_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
       //graph.addEdge(SuperstructureState.L2_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
      // graph.addEdge(SuperstructureState.L3_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-      graph.addEdge(SuperstructureState.L4_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 2, 0, Optional.of(false), Optional.of(false)));
+     // graph.addEdge(SuperstructureState.L4_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 2, 0, Optional.of(false), Optional.of(false)));
 
 
       //edges going for scoring
@@ -84,7 +91,7 @@ public class Superstructure extends SubsystemBase {
       //     graph.addEdge(SuperstructureState.values()[i], SuperstructureState.HOME_UP, new SuperstructureCommandInfo(i, i, i, Optional.empty(), Optional.of(true)));
       // }
 
-      graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.L4_EJECTED, new SuperstructureCommandInfo(11, 55, 0, Optional.of(false), Optional.of(true)));
+      graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.L4_EJECTED, new SuperstructureCommandInfo(11, 50, 0, Optional.of(false), Optional.of(true)));
       graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L4_STOWED, new SuperstructureCommandInfo(17.5, 62.5, 0, Optional.empty(), Optional.of(true)));
       graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 2, 0, Optional.empty(), Optional.of(true)));
 
@@ -94,7 +101,7 @@ public class Superstructure extends SubsystemBase {
 
       graph.addEdge(SuperstructureState.INTAKE, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(-18, 41, 0, Optional.empty(), Optional.of(true)));
       graph.addEdge(SuperstructureState.HOME_DOWN, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(-18, 41, 0, Optional.empty(), Optional.of(false)));
-      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(17.5, 41, 0, Optional.empty(), Optional.of(false)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(18, 41, 0, Optional.empty(), Optional.of(false)));
 
       //going into home up coral
 
@@ -114,9 +121,9 @@ public class Superstructure extends SubsystemBase {
     //  graph.addEdge(SuperstructureState.GROUND_INTAKE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(true)));
      // graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.GROUND_INTAKE, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
 
-      graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_DOWN, new SuperstructureCommandInfo(-17.5, 27, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_DOWN, new SuperstructureCommandInfo(-17.5, 25, 0, Optional.empty(), Optional.of(false)));
 
-      graph.addEdge(SuperstructureState.HOME_DOWN, SuperstructureState.INTAKE, new SuperstructureCommandInfo(-18, 16.75, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.HOME_DOWN, SuperstructureState.INTAKE, new SuperstructureCommandInfo(-18, 15.8, 0, Optional.of(false), Optional.of(false)));
 
 
       //transition between scoring stows
@@ -136,6 +143,8 @@ public class Superstructure extends SubsystemBase {
 
 
     following_edge = graph.getEdge(current_state, desired_state);
+
+   // manualModeTransitions.put({0.0, 0.0, 0.0}, SuperstructureState.HOME_UP);
     
 
     }
@@ -143,6 +152,8 @@ public class Superstructure extends SubsystemBase {
 
     @Override
     public void periodic() {
+
+      if (manualMode.equals(ManualMode.AUTOMATIC) && DesiredManualMode.equals(ManualMode.AUTOMATIC)) {
       SmartDashboard.putNumber("setpoint elevator", following_edge.elevatorEncoderRots);
       SmartDashboard.putNumber("setpoint pivot", following_edge.pivotPos);
       SmartDashboard.putString("following edge", graph.getEdgeTarget(following_edge).toString());
@@ -188,7 +199,7 @@ public class Superstructure extends SubsystemBase {
             
           
 
-          if (following_edge.elevatorFirst.isPresent()) {
+         if (following_edge.elevatorFirst.isPresent()) {
 
             //elevator has to move first
             if (following_edge.elevatorFirst.get()) {
@@ -212,11 +223,16 @@ public class Superstructure extends SubsystemBase {
                 elevatorIO.setPosition(following_edge.elevatorEncoderRots);
               }
 
+              else if (Math.abs(following_edge.pivotPos - wristInputs.armAngle) < 7.5) {
+                elevatorIO.setPosition(following_edge.elevatorEncoderRots);
+              }
+
             }
-
-
-
           }
+
+
+
+          
 
           else {
 
@@ -242,13 +258,13 @@ public class Superstructure extends SubsystemBase {
         //hasCoral logic
         SmartDashboard.putBoolean("does really have coral", hasCoral);
 
-        if (wristInputs.current > 45) {
-          hasCoral = true;
-        }
+        // if (wristInputs.current > 45) {
+        //   hasCoral = true;
+        // }
 
-        else {
-          hasCoral = false;
-        }
+        // else {
+        //   hasCoral = false;
+        // }
 
         //check to see if we are in a state that needs coral
 
@@ -265,8 +281,8 @@ public class Superstructure extends SubsystemBase {
             
         //add intaking/outtaking stuff here
 
-        if (current_state.equals(SuperstructureState.INTAKE) || current_state.equals(SuperstructureState.GROUND_INTAKE) && !hasCoral) {
-          wristIO.setOutputOpenLoop(-0.2);
+        if (current_state.equals(SuperstructureState.INTAKE) || current_state.equals(SuperstructureState.GROUND_INTAKE) ) {
+          wristIO.setOutputOpenLoop(-0.35);
           
         }
 
@@ -275,9 +291,9 @@ public class Superstructure extends SubsystemBase {
           wristIO.setOutputOpenLoop(0.2);
         }
 
-        else if ((current_state.equals(SuperstructureState.L1_EJECTED) || current_state.equals(SuperstructureState.L2_EJECTED) || current_state.equals(SuperstructureState.L3_EJECTED) || current_state.equals(SuperstructureState.L4_EJECTED)) 
+        else if (((current_state.equals(SuperstructureState.L1_EJECTED) || current_state.equals(SuperstructureState.L2_EJECTED) || current_state.equals(SuperstructureState.L3_EJECTED) || current_state.equals(SuperstructureState.L4_EJECTED)) && hasCoral) 
         ) {       
-          wristIO.setOutputOpenLoop(0.2);
+          wristIO.setOutputOpenLoop(0.1);
         }
 
         else if ((current_state.equals(SuperstructureState.L2_ALGAE) | current_state.equals(SuperstructureState.L3_ALGAE))  
@@ -285,9 +301,9 @@ public class Superstructure extends SubsystemBase {
 
         }
 
-        else if (hasCoral) {
-          wristIO.setOutputOpenLoop(-0.2);
-        }
+        // else if (hasCoral) {
+        //   wristIO.setOutputOpenLoop(-0.1);
+        // }
 
         
         else {
@@ -295,9 +311,42 @@ public class Superstructure extends SubsystemBase {
         }
 
 
+     }
+
+      else {
+        manualMode = ManualMode.MANUAL;
+        if (DesiredManualMode.equals(ManualMode.AUTOMATIC)) {
+          elevatorIO.setPosition(41);
+          if (Math.abs(elevatorInputs.encoderRotations_L - 41.0) < 1.0) {
+            current_state = SuperstructureState.INTERMEDIATE;
+            next_state = SuperstructureState.INTERMEDIATE;
+            desired_state = SuperstructureState.HOME_UP;
+            manualMode = ManualMode.AUTOMATIC;
+
+          }
+        }
+
+        if (hasCoral) {
+          wristIO.setOutputOpenLoop(-0.35);
+        }
+      }// SuperstructureState[] elevator_close_enough_states = manualModeTransitions.entrySet().stream()
+    }// .filter(entry -> Math.abs(entry.getKey()[1] - elevatorInputs.encoderRotations_L) < 10)
+        //.map(Map.Entry::getValue) // Extracts the key (SuperstructureState)
+       // .toArray(SuperstructureState[]::new);
+      //     SuperstructureState[] elevator_close_enough_states = map.values().stream().filter((state) -> Math.abs(graph.getEdge(current_state, state).elevatorEncoderRots - elevatorInputs.encoderRotations_L) < ElevatorConstants.toleranceElevator).toArray(SuperstructureState[]::new);
+
+       // SuperstructureState[] pivot_close_enough_states = Arrays.stream(elevator_close_enough_states).min((superstructurestate) -> ())
+        
+      
+  
 
 
-}
+      
+
+
+
+
+
 
 
 
@@ -357,6 +406,43 @@ nextState = parent;
 System.out.println((System.nanoTime() - initTime) / 1000000);
 return Optional.of(nextState);
 } 
+
+
+public void setDesiredManualMode(ManualMode newmanualMode) {
+  this.DesiredManualMode = newmanualMode;
+}
+
+public SuperstructureState getCurrentState() {
+  return current_state;
+}
+
+public ManualMode getManualMode() {
+  return manualMode;
+}
+
+
+// public void elevatorManual(double output) {
+//   elevatorIO.noMotionMagic(output);
+// }
+
+
+// public void wristManual(double output) {
+//   wristIO.manualWrist(output);
+// }
+
+// public void pivotManual(double output) {
+//   wristIO.manualPivot(output);
+// }
+
+
+public static enum ManualMode {
+  MANUAL,
+  AUTOMATIC
+}
+
+
+
+
 
 
 

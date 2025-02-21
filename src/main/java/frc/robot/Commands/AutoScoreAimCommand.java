@@ -172,6 +172,11 @@ public class AutoScoreAimCommand extends Command {
      
     }
 
+    @Override
+    public boolean isFinished() {
+        return controller.rightTrigger().getAsBoolean();
+    }
+
 
     @Override
     public void end(boolean interrupted) {
@@ -182,7 +187,7 @@ public class AutoScoreAimCommand extends Command {
 
         else {
             //put homing state logic here
-            superstructure.setDesiredState(SuperstructureState.HOME_UP);
+           superstructure.setDesiredState(SuperstructureState.HOME_UP);
         }
         
     }

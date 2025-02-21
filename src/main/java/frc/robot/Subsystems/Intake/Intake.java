@@ -28,7 +28,7 @@ public class Intake extends SubsystemBase{
     //---------------------------------------------------------Motors spining speeds--------------------------------------------------------
     public void before_first(){
         
-        funnel.set(-0.1);
+        funnel.set(0.15);
         BoxMotor.set(0.0);
         
     }
@@ -36,13 +36,13 @@ public class Intake extends SubsystemBase{
 
 
     public void intermediate(){
-        funnel.set(0);
+        funnel.set(0.15);
         BoxMotor.set(0.15);
         
     }
 
     public void after_first() {
-        funnel.set(0);
+        funnel.set(0.15);
         BoxMotor.set(0.15);
     }
     

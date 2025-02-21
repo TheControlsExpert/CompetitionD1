@@ -55,20 +55,12 @@ public class CTREDoubleProfilerElevator {
             
 
         }
-
-        if (Timer.getFPGATimestamp() - initTime > 0.5 && Math.abs(motor.getVelocity().getValueAsDouble()) < 0.1  && !hasReset) {
-           motor.set(0.03);
-            hasReset = true;
-           
-        }
-
-    
-        else {
+      
             motor.setControl(setter.withPosition(setpoint));
-        }
+       
 
 
-        if (Timer.getFPGATimestamp() - initTime > 4 && Math.abs(motor.getPosition().getValueAsDouble() - setpoint) > 2.5) {
+        if (Timer.getFPGATimestamp() - initTime > 5 && Math.abs(motor.getPosition().getValueAsDouble() - setpoint) > 1.5) {
             initiate();
         }
     }
