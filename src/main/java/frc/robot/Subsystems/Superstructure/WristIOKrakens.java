@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.WristConstants;
+import frc.robot.Subsystems.Superstructure.Superstructure.ManualMode;
 import frc.robot.util.DoubleProfilerArmNeo;
 
 public class WristIOKrakens implements WristIO {
@@ -40,12 +41,12 @@ public class WristIOKrakens implements WristIO {
     ProfiledPIDController profiler_racial = new ProfiledPIDController(0.005, 0, 0, new Constraints(300 * 10/60, 200 * 6/60));
     DoubleProfilerArmNeo profiler_new = new DoubleProfilerArmNeo(profiler_racial, pivotMotor);
 
-
+    private double output = 0.0;
 
     double kv = 0.003;
     double ks = 0.017;
     double offset = 0.455;
-    double kg = 0.019;
+    double kg = 0.017;
 
    
     //private PositionVoltage positionRequester = new PositionVoltage(0);
@@ -90,18 +91,23 @@ public class WristIOKrakens implements WristIO {
 
     }
 
-    public void updateInputs(WristIOInputs inputs) {
+    public void updateInputs(WristIOInputs inputs, ManualMode mode) {
+        SmartDashboard.putNumber("output duty cycle", output);
+        SmartDashboard.putString("actual seen mode by arm", mode.toString());
 
         inputs.armAngle = pivotMotor.getEncoder().getPosition();
         //inputs.sensorBoolean = limitSwitch.get();
         inputs.wristAngle = wristMotor.getEncoder().getPosition();
         inputs.current = armIntakeMotor.getOutputCurrent();
+        inputs.pivotEncoderAbs = armEncoder.get() - offset;
 
         SmartDashboard.putNumber("Arm current", inputs.current);
 
         SmartDashboard.putNumber("Arm Angle Theoretical", inputs.armAngle);
         SmartDashboard.putNumber("Arm angle actual", pivotMotor.getEncoder().getPosition());
 
+        if (mode.equals(ManualMode.AUTOMATIC)) {
+            SmartDashboard.putBoolean("r we doing automatic for the arm", true);
         double setpoint = profiler_racial.calculate(pivotMotor.getEncoder().getPosition(), setpointangle);
         double setpoint2 = profiler_new.calculate(setpointangle);
    
@@ -111,6 +117,15 @@ public class WristIOKrakens implements WristIO {
    
        //  motorL.set(0.05);
         pivotMotor.getClosedLoopController().setReference(profiler_racial.getSetpoint().velocity * 60, ControlType.kVelocity, ClosedLoopSlot.kSlot0, 12 * (Math.signum(profiler_racial.getSetpoint().velocity) * ks)  +  12 * (kg * Math.cos(Units.rotationsToRadians(armEncoder.get() - offset))) + kv * profiler_racial.getSetpoint().velocity * 60 + setpoint, ArbFFUnits.kVoltage);
+        }
+
+        else {
+            SmartDashboard.putBoolean("r we doing automatic for the arm bubbles", false);
+
+            pivotMotor.getClosedLoopController().setReference(0, ControlType.kVelocity, ClosedLoopSlot.kSlot0,  12 * (kg * Math.cos(Units.rotationsToRadians(armEncoder.get() - offset))) + output, ArbFFUnits.kVoltage);
+
+
+        }
 
     }
 
@@ -122,6 +137,14 @@ public class WristIOKrakens implements WristIO {
         // pivot.set(i);
    
         //motorL.set(0.3);
+    }
+
+    public void setOutputOpenLoopPivot(double output) {
+        this.output = output;
+    }
+
+    public void setOutputOpenLoopWrist(double output) {
+        wristMotor.set(output);
     }
 
     public void setWristPosition(double angle) {

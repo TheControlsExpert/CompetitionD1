@@ -1,5 +1,7 @@
 package frc.robot.Subsystems.Superstructure;
 
+import static edu.wpi.first.units.Units.derive;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,11 +13,15 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotState;
+import frc.robot.Commands.IntakeTest;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.IntakeConstants;
@@ -30,6 +36,9 @@ public class Superstructure extends SubsystemBase {
     ElevatorIOInputsAutoLogged elevatorInputs = new ElevatorIOInputsAutoLogged();
     private boolean needsResetWrist;
     private ManualMode manualMode = ManualMode.AUTOMATIC;
+
+    private boolean hasScheduledYet = false;
+    public boolean hasDoneIntakeTest = false;
 
 
     private SuperstructureState desired_state = SuperstructureState.HOME_UP;
@@ -54,8 +63,8 @@ public class Superstructure extends SubsystemBase {
         this.drive = drive;
         this.wristIO = wristIO;
         this.elevatorIO = elevatorIO;
-        wristIO.updateInputs(wristInputs);
-        elevatorIO.updateInputs(elevatorInputs);
+        wristIO.updateInputs(wristInputs, manualMode);
+        elevatorIO.updateInputs(elevatorInputs, DesiredManualMode);
         needsResetWrist = wristInputs.sensorBoolean;
 
 
@@ -91,7 +100,7 @@ public class Superstructure extends SubsystemBase {
       //     graph.addEdge(SuperstructureState.values()[i], SuperstructureState.HOME_UP, new SuperstructureCommandInfo(i, i, i, Optional.empty(), Optional.of(true)));
       // }
 
-      graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.L4_EJECTED, new SuperstructureCommandInfo(11, 50, 0, Optional.of(false), Optional.of(true)));
+      graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.L4_EJECTED, new SuperstructureCommandInfo(11, 45, 0, Optional.of(false), Optional.of(true)));
       graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L4_STOWED, new SuperstructureCommandInfo(17.5, 62.5, 0, Optional.empty(), Optional.of(true)));
       graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 2, 0, Optional.empty(), Optional.of(true)));
 
@@ -152,6 +161,9 @@ public class Superstructure extends SubsystemBase {
 
     @Override
     public void periodic() {
+      SmartDashboard.putString("manual mode", manualMode.toString());
+      wristIO.updateInputs(wristInputs, manualMode);
+      elevatorIO.updateInputs(elevatorInputs, DesiredManualMode);
 
       if (manualMode.equals(ManualMode.AUTOMATIC) && DesiredManualMode.equals(ManualMode.AUTOMATIC)) {
       SmartDashboard.putNumber("setpoint elevator", following_edge.elevatorEncoderRots);
@@ -165,8 +177,7 @@ public class Superstructure extends SubsystemBase {
 
      
 
-        wristIO.updateInputs(wristInputs);
-        elevatorIO.updateInputs(elevatorInputs);
+        
 
         needsResetAlert.set(needsResetWrist);
 
@@ -253,6 +264,36 @@ public class Superstructure extends SubsystemBase {
 
 
         }
+
+        if (current_state.equals(SuperstructureState.INTAKE) || current_state.equals(SuperstructureState.GROUND_INTAKE) ) {
+          wristIO.setOutputOpenLoop(-0.35);
+          SmartDashboard.putNumber("are we moving the intake", 1);
+          
+        }
+
+
+        else if (current_state.equals(SuperstructureState.EJECT)) {
+          wristIO.setOutputOpenLoop(0.2);
+        }
+
+        else if (((current_state.equals(SuperstructureState.L1_EJECTED) || current_state.equals(SuperstructureState.L2_EJECTED) || current_state.equals(SuperstructureState.L3_EJECTED) || current_state.equals(SuperstructureState.L4_EJECTED)) && hasCoral) 
+        ) {       
+          wristIO.setOutputOpenLoop(0.15);
+        }
+
+        else if ((current_state.equals(SuperstructureState.L2_ALGAE) | current_state.equals(SuperstructureState.L3_ALGAE))  
+        ) {
+
+        }
+
+        // else if (hasCoral) {
+        //   wristIO.setOutputOpenLoop(-0.1);
+        // }
+
+        
+        else {
+          wristIO.setOutputOpenLoop(0);
+        }
       
 
         //hasCoral logic
@@ -278,37 +319,7 @@ public class Superstructure extends SubsystemBase {
 
 
       
-            
-        //add intaking/outtaking stuff here
-
-        if (current_state.equals(SuperstructureState.INTAKE) || current_state.equals(SuperstructureState.GROUND_INTAKE) ) {
-          wristIO.setOutputOpenLoop(-0.35);
-          
-        }
-
-
-        else if (current_state.equals(SuperstructureState.EJECT)) {
-          wristIO.setOutputOpenLoop(0.2);
-        }
-
-        else if (((current_state.equals(SuperstructureState.L1_EJECTED) || current_state.equals(SuperstructureState.L2_EJECTED) || current_state.equals(SuperstructureState.L3_EJECTED) || current_state.equals(SuperstructureState.L4_EJECTED)) && hasCoral) 
-        ) {       
-          wristIO.setOutputOpenLoop(0.1);
-        }
-
-        else if ((current_state.equals(SuperstructureState.L2_ALGAE) | current_state.equals(SuperstructureState.L3_ALGAE))  
-        ) {
-
-        }
-
-        // else if (hasCoral) {
-        //   wristIO.setOutputOpenLoop(-0.1);
-        // }
-
-        
-        else {
-          wristIO.setOutputOpenLoop(0);
-        }
+      
 
 
      }
@@ -317,18 +328,25 @@ public class Superstructure extends SubsystemBase {
         manualMode = ManualMode.MANUAL;
         if (DesiredManualMode.equals(ManualMode.AUTOMATIC)) {
           elevatorIO.setPosition(41);
-          if (Math.abs(elevatorInputs.encoderRotations_L - 41.0) < 1.0) {
+          if (!hasScheduledYet) {
+            CommandScheduler.getInstance().schedule(new IntakeTest(this));
+            hasScheduledYet = true;
+          }
+          if (Math.abs(elevatorInputs.encoderRotations_L - 41.0) < 1.0 && hasDoneIntakeTest) {
+            hasDoneIntakeTest = false;
+            hasScheduledYet = false;
             current_state = SuperstructureState.INTERMEDIATE;
             next_state = SuperstructureState.INTERMEDIATE;
             desired_state = SuperstructureState.HOME_UP;
             manualMode = ManualMode.AUTOMATIC;
 
           }
+
         }
 
-        if (hasCoral) {
-          wristIO.setOutputOpenLoop(-0.35);
-        }
+
+
+        
       }// SuperstructureState[] elevator_close_enough_states = manualModeTransitions.entrySet().stream()
     }// .filter(entry -> Math.abs(entry.getKey()[1] - elevatorInputs.encoderRotations_L) < 10)
         //.map(Map.Entry::getValue) // Extracts the key (SuperstructureState)
@@ -418,6 +436,10 @@ public SuperstructureState getCurrentState() {
 
 public ManualMode getManualMode() {
   return manualMode;
+}
+
+public double getCurrentIntake() {
+  return wristInputs.current;
 }
 
 
@@ -571,5 +593,26 @@ public static enum SuperstructureState {
 }
 
 
+//manual commands
 
+public void setWristManual(double output) {
+  wristIO.setOutputOpenLoopWrist(output);
+
+}
+
+public void setElevatorManual(double output) {
+  elevatorIO.setOutputOpenLoop(output);
+}
+
+public void setPivotManual(double output) {
+  wristIO.setOutputOpenLoopPivot(output);
+}
+
+public double getPivotAngle() {
+  return Units.rotationsToRadians(wristInputs.pivotEncoderAbs);
+}
+
+public void setIntakeManual(double output) {
+  wristIO.setOutputOpenLoop(output);
+}
 }

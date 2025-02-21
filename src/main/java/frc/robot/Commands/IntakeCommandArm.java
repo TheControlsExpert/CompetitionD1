@@ -48,7 +48,7 @@ public class IntakeCommandArm extends Command {
     @Override
     public boolean isFinished() {
         SmartDashboard.putBoolean("is timing out", Timer.getFPGATimestamp() - initTime > 2 && startCounting);
-        return (intake.CurrentintakeState.equals(Intake_states.Empty) && Timer.getFPGATimestamp() - initTime > 1 && startCounting) || (Timer.getFPGATimestamp() - actualiniTime > 3);
+        return (intake.CurrentintakeState.equals(Intake_states.Empty) && Timer.getFPGATimestamp() - initTime > 0.25 && startCounting) || (Timer.getFPGATimestamp() - actualiniTime > 5);
         
     }
 
@@ -60,6 +60,7 @@ public class IntakeCommandArm extends Command {
 
         else {
             superstructure.hasCoral = false;
+            intake.setState(Intake_states.Empty);
         }
         superstructure.setDesiredState(SuperstructureState.HOME_UP);     
 }

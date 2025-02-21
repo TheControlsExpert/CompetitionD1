@@ -21,7 +21,7 @@ public class Intake extends SubsystemBase{
     }
     public Intake_states CurrentintakeState = Intake_states.Empty; // or maybe here we need to put first
     SparkMax BoxMotor = new SparkMax(18, MotorType.kBrushless);
-    SparkMax funnel = new SparkMax(19, MotorType.kBrushless);
+    SparkMax funnel = new SparkMax(21, MotorType.kBrushless);
     double initTime = 0;
    
     

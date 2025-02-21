@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Subsystems.Superstructure.Superstructure.ManualMode;
 import frc.robot.util.CTREDoubleProfilerElevator;
 
 public class ElevatorIOKrakens implements ElevatorIO {
@@ -41,7 +42,7 @@ public class ElevatorIOKrakens implements ElevatorIO {
 
     public ElevatorIOKrakens() {
         TalonFXConfiguration configL = new TalonFXConfiguration();
-        Slot0Configs slot0 = new Slot0Configs().withKV(0.123).withKS(0.0155* 12 ).withKG(0.031 * 12).withKP(0.03).withKA(0).withGravityType(GravityTypeValue.Elevator_Static);
+        Slot0Configs slot0 = new Slot0Configs().withKV(0.124).withKS(0.0155* 12 ).withKG(0.031 * 12).withKP(0.03).withKA(0).withGravityType(GravityTypeValue.Elevator_Static);
         
         var motionMagicConfigs = configL.MotionMagic;
         motionMagicConfigs.MotionMagicAcceleration = 75;
@@ -75,26 +76,46 @@ public class ElevatorIOKrakens implements ElevatorIO {
 
 
     @Override
-    public void updateInputs(ElevatorIOInputs inputs) {
+    public void updateInputs(ElevatorIOInputs inputs, ManualMode mode) {
+        
         inputs.encoderRotations_L = motorR.getPosition().getValueAsDouble();
         encoderPos = inputs.encoderRotations_L;
-        
         inputs.currentOutput_L = motorR.getStatorCurrent().getValueAsDouble();
+
+
         SmartDashboard.putNumber("elevator speed", motorL.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("setpoint tracker for elevator", setpointPosition);
-        if (Timer.getFPGATimestamp() - timer > 4 && timer > 0 && Math.abs(motorL.getPosition().getValueAsDouble() - setpointPosition) > 1) {
-            setpointPosition += 0.1;
+
+        if (mode.equals(ManualMode.AUTOMATIC)) {
+
+        if (Timer.getFPGATimestamp() - timer > 1.0 && timer > 0 && Math.abs(motorL.getPosition().getValueAsDouble() - setpointPosition) > 1 && Math.abs(motorL.getVelocity().getValueAsDouble()) < 0.1) {
+            motorL.set(Math.signum(setpointPosition - encoderPos) * 0.1);
             timer = Timer.getFPGATimestamp();
         }
 
-        if (timer > 5) {
-            SmartDashboard.putBoolean("elevatorTracking", false);
+        else {
+            motorL.setControl(mm_request.withPosition(setpointPosition));
+            SmartDashboard.putBoolean("elevatorTracking", true);
+
         }
 
-        else {
-            
+        
+    
+
+        if (Timer.getFPGATimestamp() - fullTimer > 8 && fullTimer > 0 && Math.abs(motorL.getPosition().getValueAsDouble() - setpointPosition) > 1) {
+            SmartDashboard.putBoolean("elevatorTracking", false);
         }
-        motorL.setControl(mm_request.withPosition(setpointPosition));
+    }
+
+    else {
+        timer = -10000;
+        fullTimer = -10000;
+
+
+    }
+
+        
+        
     }
 
 
@@ -126,6 +147,15 @@ public class ElevatorIOKrakens implements ElevatorIO {
         motorL.setPosition(0);
         motorR.setPosition(0);
 
+    }
+
+    public void setOutputOpenLoop(double output) {
+        if (output != 0 ) {
+        motorL.set(output);
+        }
+        else {
+            motorL.set(0.03);
+        }
     }
 
     

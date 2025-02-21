@@ -164,9 +164,27 @@ public class RobotContainer {
 
 //controller.x().whileTrue(pathfindingCommand);
 
-controller.y().whileTrue(new AutoSourcingCommand(drive, superstructure, intake, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
-controller.a().whileTrue(new AutoScoreAimCommand(drive, superstructure, controller, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
-//controller.
+controller.leftBumper().whileTrue(new AutoSourcingCommand(drive, superstructure, intake, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+controller.leftTrigger().whileTrue(Commands.either(new AutoScoreAimCommand(drive, superstructure, controller, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()), 
+                                  Commands.runEnd(() -> {superstructure.setIntakeManual(0.2);}, () -> {superstructure.setIntakeManual(0);}, superstructure), 
+                                  () -> (superstructure.DesiredManualMode.equals(ManualMode.MANUAL))));
+
+
+controller.x().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setIntakeManual(-0.2);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setIntakeManual(0);}, superstructure));
+
+//MANUAL MODES
+
+controller.povUp().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setElevatorManual(0.2);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setElevatorManual(0);}, superstructure));
+controller.povDown().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setElevatorManual(-0.1);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setElevatorManual(0);}, superstructure));
+controller.povRight().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setWristManual(0.3);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setWristManual(0);}, superstructure));
+controller.povLeft().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setWristManual(-0.3);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setWristManual(0);}, superstructure));
+
+controller.y().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
+controller.a().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(-0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
+    
+
+controller.rightBumper().onTrue(Commands.runOnce(() -> { boolean whichSwitch = superstructure.getManualMode().equals(ManualMode.AUTOMATIC); if (whichSwitch) {superstructure.setDesiredManualMode(ManualMode.MANUAL);} else {superstructure.setDesiredManualMode(ManualMode.AUTOMATIC);}}, superstructure));
+  
 
 // controller.y().whileTrue(
 

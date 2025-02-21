@@ -2,6 +2,8 @@ package frc.robot.Subsystems.Superstructure;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import frc.robot.Subsystems.Superstructure.Superstructure.ManualMode;
+
 public interface ElevatorIO {
 
 
@@ -18,5 +20,7 @@ public interface ElevatorIO {
 
    
     
-    public default void updateInputs(ElevatorIOInputs inputs) {}
+    public default void updateInputs(ElevatorIOInputs inputs, ManualMode mode) {}
+
+    public default void setOutputOpenLoop(double output) {}
 }
