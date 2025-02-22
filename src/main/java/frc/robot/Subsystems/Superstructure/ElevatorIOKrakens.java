@@ -150,7 +150,7 @@ public class ElevatorIOKrakens implements ElevatorIO {
     }
 
     public void setOutputOpenLoop(double output) {
-        if (output != 0 ) {
+        if (output != 0 && 62 - motorL.getPosition().getValueAsDouble() > 0 && motorL.getPosition().getValueAsDouble() - 2 > 0) {
         motorL.set(output);
         }
         else {

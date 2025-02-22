@@ -121,6 +121,10 @@ public class WristIOKrakens implements WristIO {
         }
 
         else {
+
+            if (pivotMotor.getEncoder().getPosition() > 22 || pivotMotor.getEncoder().getPosition() < -22) {
+                output = 0;
+            }
             SmartDashboard.putBoolean("r we doing automatic for the arm bubbles", false);
 
             pivotMotor.getClosedLoopController().setReference(0, ControlType.kVelocity, ClosedLoopSlot.kSlot0,  12 * (kg * Math.cos(Units.rotationsToRadians(armEncoder.get() - offset))) + output, ArbFFUnits.kVoltage);
