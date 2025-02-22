@@ -89,7 +89,7 @@ public class Superstructure extends SubsystemBase {
      // graph.addEdge(SuperstructureState.L1_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
       //graph.addEdge(SuperstructureState.L2_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
      // graph.addEdge(SuperstructureState.L3_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-     // graph.addEdge(SuperstructureState.L4_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 2, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.L4_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 2, 0, Optional.of(false), Optional.of(false)));
 
 
       //edges going for scoring
@@ -278,7 +278,7 @@ public class Superstructure extends SubsystemBase {
 
         else if (((current_state.equals(SuperstructureState.L1_EJECTED) || current_state.equals(SuperstructureState.L2_EJECTED) || current_state.equals(SuperstructureState.L3_EJECTED) || current_state.equals(SuperstructureState.L4_EJECTED)) && hasCoral) 
         ) {       
-          wristIO.setOutputOpenLoop(0.15);
+          wristIO.setOutputOpenLoop(0.10);
         }
 
         else if ((current_state.equals(SuperstructureState.L2_ALGAE) | current_state.equals(SuperstructureState.L3_ALGAE))  

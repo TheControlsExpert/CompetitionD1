@@ -53,7 +53,7 @@ public class ScoreCommand extends Command {
     public void end(boolean interrupted) {
         
        
-        //superstructure.setDesiredState(SuperstructureState.HOME_UP);
+        superstructure.setDesiredState(SuperstructureState.HOME_UP);
     }
 
     
