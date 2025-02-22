@@ -110,7 +110,7 @@ public class Superstructure extends SubsystemBase {
 
       graph.addEdge(SuperstructureState.INTAKE, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(-18, 41, 0, Optional.empty(), Optional.of(true)));
       graph.addEdge(SuperstructureState.HOME_DOWN, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(-18, 41, 0, Optional.empty(), Optional.of(false)));
-      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(18, 41, 0, Optional.empty(), Optional.of(false)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.HOME_DOWN, new SuperstructureCommandInfo(-18, 25, 0, Optional.empty(), Optional.of(false)));
 
       //going into home up coral
 
@@ -218,7 +218,7 @@ public class Superstructure extends SubsystemBase {
               
               if (Math.abs(following_edge.elevatorEncoderRots - elevatorInputs.encoderRotations_L) < ElevatorConstants.toleranceElevator) {
                wristIO.setVerticalAngle(following_edge.pivotPos);
-               //wristIO.setWristPosition(following_edge.wristAngle);
+               wristIO.setWristPosition(following_edge.wristAngle);
               }
 
             }
@@ -228,7 +228,7 @@ public class Superstructure extends SubsystemBase {
             else {
              
               wristIO.setVerticalAngle(following_edge.pivotPos);
-              //wristIO.setWristPosition(following_edge.wristAngle);
+              wristIO.setWristPosition(following_edge.wristAngle);
 
               if (Math.abs(following_edge.pivotPos - wristInputs.armAngle) < WristConstants.tolerancePivot) {
                 elevatorIO.setPosition(following_edge.elevatorEncoderRots);
@@ -252,7 +252,7 @@ public class Superstructure extends SubsystemBase {
             if (!next_state.equals(SuperstructureState.INTERMEDIATE)) {
             
             wristIO.setVerticalAngle(following_edge.pivotPos);
-            //wristIO.setWristPosition(following_edge.wristAngle);
+            wristIO.setWristPosition(following_edge.wristAngle);
             elevatorIO.setPosition(following_edge.elevatorEncoderRots);
             }
 

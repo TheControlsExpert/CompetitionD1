@@ -1,6 +1,7 @@
 package frc.robot.Commands;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems.Superstructure.Superstructure;
 
@@ -22,6 +23,7 @@ public class IntakeTest extends Command {
 
     @Override
     public void execute() {
+        SmartDashboard.putNumber("maxcurrent", maxCurrent);
         if (superstructure.getCurrentIntake() > maxCurrent) {
             maxCurrent = superstructure.getCurrentIntake();
         }
@@ -36,7 +38,7 @@ public class IntakeTest extends Command {
     @Override
     public void end(boolean interrupted) {
         superstructure.setIntakeManual(0);
-        if (maxCurrent > 0.5) {
+        if (maxCurrent > 70) {
         superstructure.hasCoral = true;
     }
     else {

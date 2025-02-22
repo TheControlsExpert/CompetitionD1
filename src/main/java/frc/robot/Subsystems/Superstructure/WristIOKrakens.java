@@ -74,11 +74,12 @@ public class WristIOKrakens implements WristIO {
         //Turret Config
 
         SparkFlexConfig config_wrist = new SparkFlexConfig();
-        config_wrist.closedLoop.p(WristConstants.kP_wrist);
+        config_wrist.closedLoop.p(0.15);
         config_wrist.idleMode(IdleMode.kBrake);
         config_wrist.inverted(false);
 
         wristMotor.configure(config_wrist, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        wristMotor.getEncoder().setPosition(0);
 
         //intake config
 
@@ -148,7 +149,7 @@ public class WristIOKrakens implements WristIO {
     }
 
     public void setWristPosition(double angle) {
-       // wristMotor.getClosedLoopController().setReference(angle, ControlType.kPosition);
+        wristMotor.getClosedLoopController().setReference(angle, ControlType.kPosition);
     }
 
     public void setOutputOpenLoop(double output) {

@@ -37,8 +37,12 @@ public class IntakeCommandArm extends Command {
 
     @Override
     public void execute() {
-        if (intake.CurrentintakeState.equals(Intake.Intake_states.Ready) && !startCounting) {
+        if (intake.CurrentintakeState.equals(Intake.Intake_states.Ready) && !startCounting && superstructure.getCurrentState().equals(SuperstructureState.HOME_DOWN)) {
             superstructure.setDesiredState(SuperstructureState.INTAKE);
+            
+        }
+
+        if (superstructure.getCurrentState().equals(Superstructure.SuperstructureState.INTAKE)) {
             startCounting = true;
             initTime = Timer.getFPGATimestamp();
         }
@@ -48,7 +52,7 @@ public class IntakeCommandArm extends Command {
     @Override
     public boolean isFinished() {
         SmartDashboard.putBoolean("is timing out", Timer.getFPGATimestamp() - initTime > 2 && startCounting);
-        return (intake.CurrentintakeState.equals(Intake_states.Empty) && Timer.getFPGATimestamp() - initTime > 0.25 && startCounting) || (Timer.getFPGATimestamp() - actualiniTime > 5);
+        return (intake.CurrentintakeState.equals(Intake_states.Empty) && Timer.getFPGATimestamp() - initTime > 0.25 && startCounting) || (Timer.getFPGATimestamp() - actualiniTime > 3);
         
     }
 

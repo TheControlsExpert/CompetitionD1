@@ -100,6 +100,10 @@ public class Intake extends SubsystemBase{
            
         }
 
+        else if (CurrentintakeState.equals(Intake_states.Empty) && !DistanceSensorTwo.get() && !DistanceSensorThree.get()) {
+            CurrentintakeState = Intake_states.Ready;
+        }
+
 
         
     

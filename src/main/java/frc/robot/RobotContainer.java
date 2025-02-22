@@ -167,7 +167,7 @@ public class RobotContainer {
 controller.leftBumper().whileTrue(new AutoSourcingCommand(drive, superstructure, intake, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 controller.leftTrigger().whileTrue(Commands.either(new AutoScoreAimCommand(drive, superstructure, controller, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()), 
                                   Commands.runEnd(() -> {superstructure.setIntakeManual(0.2);}, () -> {superstructure.setIntakeManual(0);}, superstructure), 
-                                  () -> (superstructure.DesiredManualMode.equals(ManualMode.MANUAL))));
+                                  () -> (!superstructure.DesiredManualMode.equals(ManualMode.MANUAL))));
 
 
 controller.x().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setIntakeManual(-0.2);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setIntakeManual(0);}, superstructure));

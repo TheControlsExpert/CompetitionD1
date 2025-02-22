@@ -20,6 +20,7 @@ import frc.robot.Constants.FieldConstants;
 import frc.robot.RobotState;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Intake.Intake;
+import frc.robot.Subsystems.Intake.Intake.Intake_states;
 import frc.robot.Subsystems.Superstructure.Superstructure;
 import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
 
@@ -59,7 +60,9 @@ public class AutoSourcingCommand extends Command {
             //open up elevator
 
             superstructure.setDesiredState(SuperstructureState.HOME_DOWN);
+            if (!intake.CurrentintakeState.equals(Intake_states.Ready)) {
             intake.setState(Intake.Intake_states.Bofore_First);
+            }
         }
     
         @Override
@@ -138,7 +141,7 @@ public class AutoSourcingCommand extends Command {
     
         @Override
         public void end(boolean interrupted) {
-        if (intake.CurrentintakeState.equals(Intake.Intake_states.After_First)) {
+        if (intake.CurrentintakeState.equals(Intake.Intake_states.After_First) || intake.CurrentintakeState.equals(Intake_states.Ready)) {
           CommandScheduler.getInstance().schedule(new IntakeCommandArm(superstructure, intake));
         }
 
@@ -150,9 +153,9 @@ public class AutoSourcingCommand extends Command {
 
         @Override
         public boolean isFinished() {
-            SmartDashboard.putBoolean("is equal to what we dont want", intake.CurrentintakeState.equals(Intake.Intake_states.After_First));
+            SmartDashboard.putBoolean("is equal to what we dont want", intake.CurrentintakeState.equals(Intake.Intake_states.After_First) | intake.CurrentintakeState.equals(Intake.Intake_states.Ready));
 
-            return intake.CurrentintakeState.equals(Intake.Intake_states.After_First);
+            return intake.CurrentintakeState.equals(Intake.Intake_states.After_First) | intake.CurrentintakeState.equals(Intake.Intake_states.Ready);
         }
 
 
