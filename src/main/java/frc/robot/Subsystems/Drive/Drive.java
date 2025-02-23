@@ -837,7 +837,7 @@ private final Field2d m_field = new Field2d();
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {
-    return 4;
+    return 5;
   }
 
   /** Returns the maximum angular speed in radians per sec. */

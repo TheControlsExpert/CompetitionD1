@@ -143,11 +143,13 @@ public class AutoSourcingCommand extends Command {
         public void end(boolean interrupted) {
         if (intake.CurrentintakeState.equals(Intake.Intake_states.After_First) || intake.CurrentintakeState.equals(Intake_states.Ready)) {
           CommandScheduler.getInstance().schedule(new IntakeCommandArm(superstructure, intake));
+          SmartDashboard.putBoolean("second part of command called", true);
         }
 
         else {
             intake.setState(Intake.Intake_states.Empty);
             superstructure.setDesiredState(SuperstructureState.HOME_UP);
+            SmartDashboard.putBoolean("second part of command called", false);
         }
     }
 

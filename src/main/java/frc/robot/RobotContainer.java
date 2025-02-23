@@ -21,12 +21,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.SwerveConstants.Mod0;
 import frc.robot.Constants.SwerveConstants.Mod1;
@@ -72,120 +74,136 @@ public class RobotContainer {
   private Command pathfindingCommand;
 
 
-
+  public static Spark leds = new Spark(0);
 
        
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
   private final AutoDriveCommand driver = new AutoDriveCommand(2, 0.03, 0, 1);
   Superstructure superstructure;
+  public static levelscore CurrnetLevelPosition = levelscore.Level4;
+  GenericHID ButtonControllerLevels = new GenericHID(1);
+  
   
     private GyroIONavX gyro;
-    
-  
-    // Dashboard inputs
-    // final LoggedDashboardChooser<Command> autoChooser;
-  
-    /** The container for the robot. Contains subsystems, OI devices, and commands. */
-    public RobotContainer() {
-     this.intake = new Intake();
-      this.gyro = new GyroIONavX();
-    
-        // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                gyro,
-                new ModuleIOTalonFX(Mod0.constants, 0),
-                new ModuleIOTalonFX(Mod1.constants, 1),
-                new ModuleIOTalonFX(Mod2.constants, 2),
-                new ModuleIOTalonFX(Mod3.constants, 3));
+    private JoystickButton thirteen;
+    private JoystickButton fourteen;
+    private JoystickButton fifteen;
+    private JoystickButton sixteen;
 
-        superstructure = new Superstructure(new WristIOKrakens(), new ElevatorIOKrakens(), drive);        
-       
-
-      //  VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
-
-         constraints = new PathConstraints(
-          2.0, 4.0,
-          Units.degreesToRadians(400), Units.degreesToRadians(720));
-  
-  // Since AutoBuilder is configured, we can use it to build pathfinding commands
-   pathfindingCommand = AutoBuilder.pathfindToPose(
-          new Pose2d(16.30, 6.89, Rotation2d.fromDegrees(58)),
-          constraints,
-          0.0 // Goal end velocity in meters/sec
         
-  );
-  
-    // Set up SysId routines
-    //autoChooser.addOption(
-    //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    // autoChooser.addOption(
-    //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Forward)",
-    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Reverse)",
-    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-    // Configure the button bindings
-    configureButtonBindings();
-  }
-
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-    // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        new DriveCommand(
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX(),
-            drive));
-
-
-//     controller.a().whileTrue(Commands.run(() -> 
+      
+        // Dashboard inputs
+        // final LoggedDashboardChooser<Command> autoChooser;
+      
+        /** The container for the robot. Contains subsystems, OI devices, and commands. */
+        public RobotContainer() {
+         this.intake = new Intake();
+          this.gyro = new GyroIONavX();
+        
+            // Real robot, instantiate hardware IO implementations
+            drive =
+                new Drive(
+                    gyro,
+                    new ModuleIOTalonFX(Mod0.constants, 0),
+                    new ModuleIOTalonFX(Mod1.constants, 1),
+                    new ModuleIOTalonFX(Mod2.constants, 2),
+                    new ModuleIOTalonFX(Mod3.constants, 3));
     
-// drive.runVelocity(
-//     ChassisSpeeds.fromFieldRelativeSpeeds(
-//       driver.getTargetSpeeds(drive.getEstimatedPosition(), new Pose2d(16.30, 6.89, Rotation2d.fromDegrees(58))),
-//         isFlipped
-//             ? drive.getRotation().plus(new Rotation2d(Math.PI))
-//             : drive.getRotation())), drive));
-
-//controller.x().whileTrue(pathfindingCommand);
-
-controller.leftBumper().whileTrue(new AutoSourcingCommand(drive, superstructure, intake, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
-controller.leftTrigger().whileTrue(Commands.either(new AutoScoreAimCommand(drive, superstructure, controller, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()), 
-                                  Commands.runEnd(() -> {superstructure.setIntakeManual(0.2);}, () -> {superstructure.setIntakeManual(0);}, superstructure), 
-                                  () -> (!superstructure.DesiredManualMode.equals(ManualMode.MANUAL))));
-
-
-controller.x().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setIntakeManual(-0.2);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setIntakeManual(0);}, superstructure));
-
-//MANUAL MODES
-
-controller.povUp().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setElevatorManual(0.2);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setElevatorManual(0);}, superstructure));
-controller.povDown().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setElevatorManual(-0.1);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setElevatorManual(0);}, superstructure));
-controller.povRight().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setWristManual(0.3);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setWristManual(0);}, superstructure));
-controller.povLeft().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setWristManual(-0.3);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setWristManual(0);}, superstructure));
-
-controller.y().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
-controller.a().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(-0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
+            superstructure = new Superstructure(new WristIOKrakens(), new ElevatorIOKrakens(), drive);        
+           
     
-
-controller.rightBumper().onTrue(Commands.runOnce(() -> { boolean whichSwitch = superstructure.getManualMode().equals(ManualMode.AUTOMATIC); if (whichSwitch) {superstructure.setDesiredManualMode(ManualMode.MANUAL);} else {superstructure.setDesiredManualMode(ManualMode.AUTOMATIC);}}, superstructure));
-  
-
+          //  VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
+    
+             constraints = new PathConstraints(
+              2.0, 4.0,
+              Units.degreesToRadians(400), Units.degreesToRadians(720));
+      
+      // Since AutoBuilder is configured, we can use it to build pathfinding commands
+       pathfindingCommand = AutoBuilder.pathfindToPose(
+              new Pose2d(16.30, 6.89, Rotation2d.fromDegrees(58)),
+              constraints,
+              0.0 // Goal end velocity in meters/sec
+            
+      );
+      
+        // Set up SysId routines
+        //autoChooser.addOption(
+        //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+        // autoChooser.addOption(
+        //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+        // autoChooser.addOption(
+        //     "Drive SysId (Quasistatic Forward)",
+        //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        // autoChooser.addOption(
+        //     "Drive SysId (Quasistatic Reverse)",
+        //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        // autoChooser.addOption(
+        //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        // autoChooser.addOption(
+        //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    
+        // Configure the button bindings
+        configureButtonBindings();
+      }
+    
+      public void levelscore(levelscore LevelWeScore){ 
+        CurrnetLevelPosition = LevelWeScore;
+      }
+    
+      /**
+       * Use this method to define your button->command mappings. Buttons can be created by
+       * instantiating a {@link GenericHID} or one of its subclasses ({@link
+       * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+       * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+       */
+      private void configureButtonBindings() {
+        // Default command, normal field-relative drive
+        drive.setDefaultCommand(
+            new DriveCommand(
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getRightX(),
+                drive));
+    
+    
+    //     controller.a().whileTrue(Commands.run(() -> 
+        
+    // drive.runVelocity(
+    //     ChassisSpeeds.fromFieldRelativeSpeeds(
+    //       driver.getTargetSpeeds(drive.getEstimatedPosition(), new Pose2d(16.30, 6.89, Rotation2d.fromDegrees(58))),
+    //         isFlipped
+    //             ? drive.getRotation().plus(new Rotation2d(Math.PI))
+    //             : drive.getRotation())), drive));
+    
+    //controller.x().whileTrue(pathfindingCommand);
+    
+    controller.leftBumper().whileTrue(new AutoSourcingCommand(drive, superstructure, intake, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+    controller.leftTrigger().whileTrue(Commands.either(new AutoScoreAimCommand(drive, superstructure, controller, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()), 
+                                      Commands.runEnd(() -> {superstructure.setIntakeManual(0.2);}, () -> {superstructure.setIntakeManual(0);}, superstructure), 
+                                      () -> (!superstructure.DesiredManualMode.equals(ManualMode.MANUAL))));
+    
+    
+    controller.x().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setIntakeManual(-0.2);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setIntakeManual(0);}, superstructure));
+    
+    //MANUAL MODES
+    
+    controller.povUp().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setElevatorManual(0.2);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setElevatorManual(0);}, superstructure));
+    controller.povDown().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setElevatorManual(-0.1);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setElevatorManual(0);}, superstructure));
+    controller.povRight().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setWristManual(0.3);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setWristManual(0);}, superstructure));
+    controller.povLeft().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setWristManual(-0.3);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setWristManual(0);}, superstructure));
+    
+    controller.y().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
+    controller.a().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(-0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
+        
+    
+    controller.rightBumper().onTrue(Commands.runOnce(() -> { boolean whichSwitch = superstructure.getManualMode().equals(ManualMode.AUTOMATIC); if (whichSwitch) {superstructure.setDesiredManualMode(ManualMode.MANUAL);} else {superstructure.setDesiredManualMode(ManualMode.AUTOMATIC);}}, superstructure));
+    
+      
+   thirteen = new JoystickButton(ButtonControllerLevels, 1);
+   fourteen = new JoystickButton(ButtonControllerLevels, 2);
+   fifteen = new JoystickButton(ButtonControllerLevels, 3);
+   sixteen = new JoystickButton(ButtonControllerLevels, 4);
 // controller.y().whileTrue(
 
 
@@ -244,15 +262,31 @@ controller.rightBumper().onTrue(Commands.runOnce(() -> { boolean whichSwitch = s
 }
 
 
-
-
-public enum ScoringLevel {
-  L1,
-  L2,
-  L3,
-  L4
+public void ButtonLevelscoring() {
+  if (thirteen.getAsBoolean()) {  
+    CurrnetLevelPosition = levelscore.Level1;
+  }
+  else if (fourteen.getAsBoolean()) {
+    CurrnetLevelPosition = levelscore.Level2;
+  }
+  else if (fifteen.getAsBoolean()) {
+    CurrnetLevelPosition = levelscore.Level3;
+  }
+  else if (sixteen.getAsBoolean()) {
+    CurrnetLevelPosition = levelscore.Level4;
+  }
 }
 
+
+
+
+public static enum levelscore {
+  Level1,
+  Level2,
+  Level3,
+  Level4,
+
+}
 
 public enum ScoringPosition {
   A,

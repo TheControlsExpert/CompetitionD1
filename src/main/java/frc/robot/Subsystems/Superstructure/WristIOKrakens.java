@@ -65,7 +65,7 @@ public class WristIOKrakens implements WristIO {
 
 
         pivotMotor.configure(config, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
+        pivotMotor.getEncoder().setPosition(0);
         pivotMotor.getEncoder().setPosition((armEncoder.get() - offset) * 75);
        
 
@@ -104,7 +104,7 @@ public class WristIOKrakens implements WristIO {
 
         SmartDashboard.putNumber("Arm current", inputs.current);
 
-        SmartDashboard.putNumber("Arm Angle Theoretical", inputs.armAngle);
+        SmartDashboard.putNumber("Arm Angle Theoretical", inputs.pivotEncoderAbs);
         SmartDashboard.putNumber("Arm angle actual", pivotMotor.getEncoder().getPosition());
 
         if (mode.equals(ManualMode.AUTOMATIC)) {

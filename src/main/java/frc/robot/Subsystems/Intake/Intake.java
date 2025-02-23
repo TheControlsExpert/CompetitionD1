@@ -37,7 +37,7 @@ public class Intake extends SubsystemBase{
 
     public void intermediate(){
         funnel.set(0.15);
-        BoxMotor.set(0.15);
+        BoxMotor.set(0.2);
         
     }
 

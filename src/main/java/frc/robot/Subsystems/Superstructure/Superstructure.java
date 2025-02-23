@@ -76,9 +76,9 @@ public class Superstructure extends SubsystemBase {
 
       //edges going home-up no coral  
 
-      graph.addEdge(SuperstructureState.EJECT, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-      graph.addEdge(SuperstructureState.INITIAL, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 2, 0, Optional.empty(), Optional.of(false)));
-      graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 2, 0, Optional.empty(), Optional.of(false)));
+      graph.addEdge(SuperstructureState.EJECT, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 20, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.INITIAL, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.empty(), Optional.of(false)));
+      graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.empty(), Optional.of(false)));
 
      // graph.addEdge(SuperstructureState.L3_ALGAE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
      // graph.addEdge(SuperstructureState.L2_ALGAE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
@@ -88,8 +88,8 @@ public class Superstructure extends SubsystemBase {
 
      // graph.addEdge(SuperstructureState.L1_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
       //graph.addEdge(SuperstructureState.L2_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-     // graph.addEdge(SuperstructureState.L3_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-      graph.addEdge(SuperstructureState.L4_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 2, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.L3_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5 , 20, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.L4_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.of(false), Optional.of(false)));
 
 
       //edges going for scoring
@@ -100,17 +100,24 @@ public class Superstructure extends SubsystemBase {
       //     graph.addEdge(SuperstructureState.values()[i], SuperstructureState.HOME_UP, new SuperstructureCommandInfo(i, i, i, Optional.empty(), Optional.of(true)));
       // }
 
-      graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.L4_EJECTED, new SuperstructureCommandInfo(11, 45, 0, Optional.of(false), Optional.of(true)));
-      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L4_STOWED, new SuperstructureCommandInfo(17.5, 62.5, 0, Optional.empty(), Optional.of(true)));
-      graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 2, 0, Optional.empty(), Optional.of(true)));
+      graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.L4_EJECTED, new SuperstructureCommandInfo(9.4, 48, 0, Optional.of(false), Optional.of(true)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L4_STOWED, new SuperstructureCommandInfo(12, 57, 0, Optional.of(true), Optional.of(true)));
+      graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.empty(), Optional.of(true)));
+
+      graph.addEdge(SuperstructureState.L3_STOWED, SuperstructureState.L3_EJECTED, new SuperstructureCommandInfo(9.17, 25, 0, Optional.of(false), Optional.of(true)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L3_STOWED, new SuperstructureCommandInfo(12, 38, 0, Optional.of(true), Optional.of(true)));
+      graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.empty(), Optional.of(true)));
 
       //going into intermediate 
 
+      graph.addEdge(SuperstructureState.L2_STOWED, SuperstructureState.L2_EJECTED, new SuperstructureCommandInfo(9.17, 15, 0, Optional.of(false), Optional.of(true)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L2_STOWED, new SuperstructureCommandInfo(12, 25, 0, Optional.of(true), Optional.of(true)));
+      graph.addEdge(SuperstructureState.L2_STOWED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.empty(), Optional.of(true)));
 
 
       graph.addEdge(SuperstructureState.INTAKE, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(-18, 41, 0, Optional.empty(), Optional.of(true)));
       graph.addEdge(SuperstructureState.HOME_DOWN, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(-18, 41, 0, Optional.empty(), Optional.of(false)));
-      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.HOME_DOWN, new SuperstructureCommandInfo(-18, 25, 0, Optional.empty(), Optional.of(false)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.HOME_DOWN, new SuperstructureCommandInfo(-18, 26, 0, Optional.empty(), Optional.of(false)));
 
       //going into home up coral
 
@@ -130,9 +137,9 @@ public class Superstructure extends SubsystemBase {
     //  graph.addEdge(SuperstructureState.GROUND_INTAKE, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(true)));
      // graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.GROUND_INTAKE, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
 
-      graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_DOWN, new SuperstructureCommandInfo(-17.5, 25, 0, Optional.empty(), Optional.of(false)));
+      graph.addEdge(SuperstructureState.INTERMEDIATE, SuperstructureState.HOME_DOWN, new SuperstructureCommandInfo(-17.5, 26, 0, Optional.empty(), Optional.of(false)));
 
-      graph.addEdge(SuperstructureState.HOME_DOWN, SuperstructureState.INTAKE, new SuperstructureCommandInfo(-18, 15.8, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.HOME_DOWN, SuperstructureState.INTAKE, new SuperstructureCommandInfo(-18, 14, 0, Optional.of(false), Optional.of(false)));
 
 
       //transition between scoring stows
@@ -276,10 +283,10 @@ public class Superstructure extends SubsystemBase {
           wristIO.setOutputOpenLoop(0.2);
         }
 
-        else if (((current_state.equals(SuperstructureState.L1_EJECTED) || current_state.equals(SuperstructureState.L2_EJECTED) || current_state.equals(SuperstructureState.L3_EJECTED) || current_state.equals(SuperstructureState.L4_EJECTED)) && hasCoral) 
-        ) {       
-          wristIO.setOutputOpenLoop(0.10);
-        }
+         else if (((desired_state.equals(SuperstructureState.L1_EJECTED) || desired_state.equals(SuperstructureState.L2_EJECTED) || desired_state.equals(SuperstructureState.L3_EJECTED) || desired_state.equals(SuperstructureState.L4_EJECTED)) && hasCoral && (current_state == desired_state || Math.abs(wristInputs.armAngle - graph.getEdge(current_state, desired_state).pivotPos) < 1)))
+          {       
+           wristIO.setOutputOpenLoop(0.1);
+         }
 
         else if ((current_state.equals(SuperstructureState.L2_ALGAE) | current_state.equals(SuperstructureState.L3_ALGAE))  
         ) {
@@ -510,6 +517,7 @@ public boolean hasCoral() {
 
 public boolean isEdgeAllowed(SuperstructureCommandInfo edge, SuperstructureState state) {
   //can go on path bcs we have coral
+  SmartDashboard.putBoolean("is edge allowed", false);
  
 
   return edge.requiresCoral.get().equals(hasCoral) || state.equals(SuperstructureState.HOME_UP);

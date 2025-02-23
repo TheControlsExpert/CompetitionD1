@@ -42,7 +42,7 @@ public class ElevatorIOKrakens implements ElevatorIO {
 
     public ElevatorIOKrakens() {
         TalonFXConfiguration configL = new TalonFXConfiguration();
-        Slot0Configs slot0 = new Slot0Configs().withKV(0.124).withKS(0.0155* 12 ).withKG(0.031 * 12).withKP(0.03).withKA(0).withGravityType(GravityTypeValue.Elevator_Static);
+        Slot0Configs slot0 = new Slot0Configs().withKV(0.121).withKS(0.0155* 12 ).withKG(0.031 * 12).withKP(0.03).withKA(0).withGravityType(GravityTypeValue.Elevator_Static);
         
         var motionMagicConfigs = configL.MotionMagic;
         motionMagicConfigs.MotionMagicAcceleration = 75;
@@ -84,7 +84,7 @@ public class ElevatorIOKrakens implements ElevatorIO {
 
 
         SmartDashboard.putNumber("elevator speed", motorL.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("setpoint tracker for elevator", setpointPosition);
+        SmartDashboard.putNumber("setpoint tracker for elevator", encoderPos);
 
         if (mode.equals(ManualMode.AUTOMATIC)) {
 
@@ -150,11 +150,11 @@ public class ElevatorIOKrakens implements ElevatorIO {
     }
 
     public void setOutputOpenLoop(double output) {
-        if (output != 0 && 62 - motorL.getPosition().getValueAsDouble() > 0 && motorL.getPosition().getValueAsDouble() - 2 > 0) {
-        motorL.set(output);
+        if (output == 0 || (56 - motorL.getPosition().getValueAsDouble() < 0 && output > 0) || (motorL.getPosition().getValueAsDouble() - 2 < 0 && output < 0)) {
+        motorL.set(0.03);
         }
         else {
-            motorL.set(0.03);
+            motorL.set(output);
         }
     }
 
