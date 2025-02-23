@@ -11,11 +11,14 @@ import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.wpilibj.CAN;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Subsystems.Drive.GyroIONavX;
 import frc.robot.Subsystems.Drive.PhoenixOdometryThread;
 
@@ -24,9 +27,22 @@ public class Robot extends TimedRobot {
 
   //private final AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
   private final RobotContainer m_robotContainer;
+  private JoystickButton thirteen;
+  private JoystickButton fourteen;
+  private JoystickButton fifteen;
+  private JoystickButton sixteen;
+  public static levelscore CurrnetLevelPosition = levelscore.Level4;
   
     public Robot() {
      m_robotContainer = new RobotContainer();
+     CurrnetLevelPosition = levelscore.Level4;
+    GenericHID ButtonControllerLevels = new GenericHID(1);
+
+       
+   thirteen = new JoystickButton(ButtonControllerLevels, 1);
+   fourteen = new JoystickButton(ButtonControllerLevels, 2);
+   fifteen = new JoystickButton(ButtonControllerLevels, 3);
+   sixteen = new JoystickButton(ButtonControllerLevels, 4);
 
     }
   
@@ -34,28 +50,39 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
       CommandScheduler.getInstance().run();
       //SmartDashboard.putNumber("accel", gyro.getWorldLinearAccelX());
+      SmartDashboard.putString("CurrnetScoringPosition", CurrnetLevelPosition.toString());
+
+     ButtonLevelscoring();
     }
   
     @Override
-    public void disabledInit() {
-       
-
+    public void disabledInit() {}
 
     
+public static enum levelscore {
+  Level1,
+  Level2,
+  Level3,
+  Level4,
 
+}
 
+    public  void ButtonLevelscoring() {
+      if (thirteen.getAsBoolean()) {  
+        CurrnetLevelPosition = levelscore.Level1;
+      }
+      else if (fourteen.getAsBoolean()) {
+        CurrnetLevelPosition = levelscore.Level2;
+      }
+      else if (fifteen.getAsBoolean()) {
+        CurrnetLevelPosition = levelscore.Level3;
+      }
+      else if (sixteen.getAsBoolean()) {
+        CurrnetLevelPosition = levelscore.Level4;
+      }
+    }
+       
 
-
-
-
-
-   
-
-
-
-
-
-  }
 
   @Override
   public void disabledPeriodic() {}

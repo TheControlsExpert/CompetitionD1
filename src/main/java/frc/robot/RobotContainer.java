@@ -81,15 +81,11 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private final AutoDriveCommand driver = new AutoDriveCommand(2, 0.03, 0, 1);
   Superstructure superstructure;
-  public static levelscore CurrnetLevelPosition = levelscore.Level4;
-  GenericHID ButtonControllerLevels = new GenericHID(1);
+  
   
   
     private GyroIONavX gyro;
-    private JoystickButton thirteen;
-    private JoystickButton fourteen;
-    private JoystickButton fifteen;
-    private JoystickButton sixteen;
+
 
         
       
@@ -147,9 +143,7 @@ public class RobotContainer {
         configureButtonBindings();
       }
     
-      public void levelscore(levelscore LevelWeScore){ 
-        CurrnetLevelPosition = LevelWeScore;
-      }
+     
     
       /**
        * Use this method to define your button->command mappings. Buttons can be created by
@@ -200,10 +194,7 @@ public class RobotContainer {
     controller.rightBumper().onTrue(Commands.runOnce(() -> { boolean whichSwitch = superstructure.getManualMode().equals(ManualMode.AUTOMATIC); if (whichSwitch) {superstructure.setDesiredManualMode(ManualMode.MANUAL);} else {superstructure.setDesiredManualMode(ManualMode.AUTOMATIC);}}, superstructure));
     
       
-   thirteen = new JoystickButton(ButtonControllerLevels, 1);
-   fourteen = new JoystickButton(ButtonControllerLevels, 2);
-   fifteen = new JoystickButton(ButtonControllerLevels, 3);
-   sixteen = new JoystickButton(ButtonControllerLevels, 4);
+  
 // controller.y().whileTrue(
 
 
@@ -262,31 +253,12 @@ public class RobotContainer {
 }
 
 
-public void ButtonLevelscoring() {
-  if (thirteen.getAsBoolean()) {  
-    CurrnetLevelPosition = levelscore.Level1;
-  }
-  else if (fourteen.getAsBoolean()) {
-    CurrnetLevelPosition = levelscore.Level2;
-  }
-  else if (fifteen.getAsBoolean()) {
-    CurrnetLevelPosition = levelscore.Level3;
-  }
-  else if (sixteen.getAsBoolean()) {
-    CurrnetLevelPosition = levelscore.Level4;
-  }
-}
 
 
 
 
-public static enum levelscore {
-  Level1,
-  Level2,
-  Level3,
-  Level4,
 
-}
+
 
 public enum ScoringPosition {
   A,

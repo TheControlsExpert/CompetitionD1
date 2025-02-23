@@ -13,9 +13,10 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.RobotState;
-import frc.robot.RobotContainer.levelscore;
+
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Superstructure.Superstructure;
 import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
@@ -52,15 +53,15 @@ public class AutoScoreAimCommand extends Command {
 
     @Override
     public void initialize() {
-        if (RobotContainer.CurrnetLevelPosition.equals(levelscore.Level4)) {
+        if (Robot.CurrnetLevelPosition.equals(Robot.levelscore.Level4)) {
             superstructure.setDesiredState(SuperstructureState.L4_STOWED);
         }
 
-        else if (RobotContainer.CurrnetLevelPosition.equals(levelscore.Level3)) {
+        else if (Robot.CurrnetLevelPosition.equals(Robot.levelscore.Level3)) {
             superstructure.setDesiredState(SuperstructureState.L3_STOWED);
         }
 
-        else if (RobotContainer.CurrnetLevelPosition.equals(levelscore.Level2)) {
+        else if (Robot.CurrnetLevelPosition.equals(Robot.levelscore.Level2)) {
             superstructure.setDesiredState(SuperstructureState.L2_STOWED);
         }
 

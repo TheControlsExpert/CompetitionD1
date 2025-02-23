@@ -5,8 +5,8 @@ import org.jgrapht.alg.color.SmallestDegreeLastColoring;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Robot;
 import frc.robot.RobotContainer;
-import frc.robot.RobotContainer.levelscore;
 import frc.robot.RobotState;
 import frc.robot.Subsystems.Superstructure.Superstructure;
 import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
@@ -25,15 +25,15 @@ public class ScoreCommand extends Command {
     public void initialize() {
         initTime = Timer.getFPGATimestamp();
 
-         if (RobotContainer.CurrnetLevelPosition.equals(levelscore.Level4)) {
+         if (Robot.CurrnetLevelPosition.equals(Robot.levelscore.Level4)) {
             superstructure.setDesiredState(SuperstructureState.L4_EJECTED);
         }
 
-        else if (RobotContainer.CurrnetLevelPosition.equals(levelscore.Level3)) {
+        else if (Robot.CurrnetLevelPosition.equals(Robot.levelscore.Level3)) {
             superstructure.setDesiredState(SuperstructureState.L3_EJECTED);
         }
 
-        else if (RobotContainer.CurrnetLevelPosition.equals(levelscore.Level2)) {
+        else if (Robot.CurrnetLevelPosition.equals(Robot.levelscore.Level2)) {
             superstructure.setDesiredState(SuperstructureState.L2_EJECTED);
         }
 
