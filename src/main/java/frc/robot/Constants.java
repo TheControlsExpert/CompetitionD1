@@ -236,8 +236,23 @@ public final class Constants {
     public static final int IDRight = 13;
     public static final double toleranceElevator = 1;
 
+    public static final double maxHeightAccel = 2;
+    public static final double maxHeight = 25;
+
+    public static final double maxHeightAccel2 = 1;
+    public static final double maxHeight2 = 43;
+
+
+
+
+
+    public static final double minHeightAccel = 4.5;
+    public static final double minHeight = 0.5;
+
 
   }
+
+  
 
   public static class WristConstants {
     public static final int ID_Intake = 0;

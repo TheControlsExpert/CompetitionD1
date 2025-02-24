@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.LimelightHelpers;
 
@@ -38,6 +39,7 @@ public class GyroIONavX implements GyroIO {
     //   navX.getRawAccelY() * navX.getRawAccelY() + 
     //   navX.getRawAccelZ() * navX.getRawAccelZ())));
     
+    
 
     
 
@@ -51,6 +53,7 @@ public class GyroIONavX implements GyroIO {
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
+
     if (!navX.isCalibrating() & !resetHasntHappened) {
       navX.zeroYaw();
       navX.reset();
@@ -61,7 +64,8 @@ public class GyroIONavX implements GyroIO {
 
     SmartDashboard.putNumber("gyro actual", navX.getYaw());
     inputs.connected = navX.isConnected();
-    inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw()  + rotation_offset);
+    double addON = DriverStation.getAlliance().equals(DriverStation.Alliance.Red) ? 180 : 0;
+    inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw()  + rotation_offset + addON);
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());
 
     inputs.odometryYawTimestamps =
@@ -73,10 +77,14 @@ public class GyroIONavX implements GyroIO {
 
      inputs.odometryaccelXpositions = accelerometer.getX();
      inputs.odometryaccelYpositions = accelerometer.getY();
+    
         
-    LimelightHelpers.SetRobotOrientation("limelight-threegf", -navX.getYaw() + rotation_offset, 0 ,0 ,0 ,0 ,0 );
+    LimelightHelpers.SetRobotOrientation("limelight-threegf", -navX.getYaw() + rotation_offset  - 13 , 0 ,0 ,0 ,0 ,0 );
+
+    LimelightHelpers.SetRobotOrientation("limelight-threegs", -navX.getYaw() + rotation_offset + 180 + 13 , 0 ,0 ,0 ,0 ,0 );
+    LimelightHelpers.SetRobotOrientation("limelight-four", -navX.getYaw() + rotation_offset + 20 + addON, 0 ,0 ,0 ,0 ,0 );
     SmartDashboard.putBoolean("setting robot orientation", true);
-    SmartDashboard.putNumber("reset pos",  -navX.getYaw() );
+    SmartDashboard.putNumber("reset pos",  -navX.getYaw() + rotation_offset + 180 - 13 + addON);
     yawTimestampQueue.clear();
     yawPositionQueue.clear();
   }

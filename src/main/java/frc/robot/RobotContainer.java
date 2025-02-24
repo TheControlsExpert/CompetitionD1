@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -37,9 +38,11 @@ import frc.robot.Constants.SwerveConstants.Mod3;
 import frc.robot.Commands.AutoDriveCommand;
 import frc.robot.Commands.AutoScoreAimCommand;
 import frc.robot.Commands.AutoSourcingCommand;
+import frc.robot.Commands.AutonomousL4;
 import frc.robot.Commands.DriveCommand;
 import frc.robot.Commands.FeedforwardCharacterization;
 import frc.robot.Commands.IntakingCommand;
+import frc.robot.Commands.StraightDriveCommand;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Drive.GyroIONavX;
 import frc.robot.Subsystems.Drive.ModuleIOTalonFX;
@@ -81,6 +84,10 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private final AutoDriveCommand driver = new AutoDriveCommand(2, 0.03, 0, 1);
   Superstructure superstructure;
+
+  private boolean isFlipped =
+  DriverStation.getAlliance().isPresent()
+  && DriverStation.getAlliance().get() == Alliance.Red;
   
   
   
@@ -109,7 +116,7 @@ public class RobotContainer {
             superstructure = new Superstructure(new WristIOKrakens(), new ElevatorIOKrakens(), drive);        
            
     
-          //  VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
+            VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
     
              constraints = new PathConstraints(
               2.0, 4.0,
@@ -161,13 +168,13 @@ public class RobotContainer {
                 drive));
     
     
-    //     controller.a().whileTrue(Commands.run(() -> 
-        
+    //     controller.b().whileTrue(Commands.run(() -> 
+      
     // drive.runVelocity(
     //     ChassisSpeeds.fromFieldRelativeSpeeds(
-    //       driver.getTargetSpeeds(drive.getEstimatedPosition(), new Pose2d(16.30, 6.89, Rotation2d.fromDegrees(58))),
-    //         isFlipped
-    //             ? drive.getRotation().plus(new Rotation2d(Math.PI))
+    //       driver.getTargetSpeeds(drive.getEstimatedPosition(), RobotState.getInstance().getScoringPose()),
+            
+    //        isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI))
     //             : drive.getRotation())), drive));
     
     //controller.x().whileTrue(pathfindingCommand);
@@ -193,6 +200,9 @@ public class RobotContainer {
     
     controller.rightBumper().onTrue(Commands.runOnce(() -> { boolean whichSwitch = superstructure.getManualMode().equals(ManualMode.AUTOMATIC); if (whichSwitch) {superstructure.setDesiredManualMode(ManualMode.MANUAL);} else {superstructure.setDesiredManualMode(ManualMode.AUTOMATIC);}}, superstructure));
     
+    controller.b().onTrue(Commands.runOnce(() -> {drive.resetGyro();}, drive));
+
+   // controller.b().whileTrue(pathfindingCommand)
       
   
 // controller.y().whileTrue(
@@ -249,7 +259,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return FeedforwardCharacterization.feedforwardCommand(drive);
+    return new SequentialCommandGroup(new StraightDriveCommand(2, drive), new AutonomousL4(drive, superstructure));
 }
 
 

@@ -37,9 +37,9 @@ public class ScoreCommand extends Command {
             superstructure.setDesiredState(SuperstructureState.L2_EJECTED);
         }
 
-        // else if (RobotContainer.CurrnetLevelPosition.equals(levelscore.Level1)) {
-        //     superstructure.setDesiredState(SuperstructureState.L1_EJECTED);
-        // }
+        else if (Robot.CurrnetLevelPosition.equals(Robot.levelscore.Level1)) {
+            superstructure.setDesiredState(SuperstructureState.L1_EJECTED);
+        }
 
 
        

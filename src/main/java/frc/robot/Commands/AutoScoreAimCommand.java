@@ -65,9 +65,9 @@ public class AutoScoreAimCommand extends Command {
             superstructure.setDesiredState(SuperstructureState.L2_STOWED);
         }
 
-        // else if (RobotContainer.CurrnetLevelPosition.equals(levelscore.Level1)) {
-        //     superstructure.setDesiredState(SuperstructureState.L1_STOWED);
-        // }
+        else if (Robot.CurrnetLevelPosition.equals(Robot.levelscore.Level1)) {
+            superstructure.setDesiredState(SuperstructureState.L1_STOWED);
+        }
 
         // else {
         //     superstructure.setDesiredState(SuperstructureState.L4_STOWED);

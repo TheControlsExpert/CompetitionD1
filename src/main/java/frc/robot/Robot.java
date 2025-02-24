@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Subsystems.Drive.GyroIONavX;
 import frc.robot.Subsystems.Drive.PhoenixOdometryThread;
+import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -110,6 +111,8 @@ public static enum levelscore {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    m_robotContainer.superstructure.setDesiredState(SuperstructureState.HOME_UP);
   }
 
   @Override

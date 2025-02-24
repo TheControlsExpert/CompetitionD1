@@ -11,6 +11,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -105,9 +107,9 @@ public class AutoDriveCommand {
 
         // If the Y position of the robot is not in range of the target
         // then we offset the target X position
-        if(Math.abs(deltaX) > TARGET_IN_RANGE_THRESHOLD){
-            targetPoseX -= TARGET_OUT_OF_RANGE_X_OFFSET;
-        }
+        // if(Math.abs(deltaX) > TARGET_IN_RANGE_THRESHOLD){
+        //     targetPoseX -= TARGET_OUT_OF_RANGE_X_OFFSET;
+        // }
 
         pidDriveToPosX.setGoal(targetPoseX);
         pidPosCorrectieX = pidDriveToPosX.calculate(currentPoseX, targetPoseX);
@@ -119,14 +121,9 @@ public class AutoDriveCommand {
         double profileVY = pidDriveToPosY.getSetpoint().velocity;
         speedY = pidPosCorrectieY;
 
-        SmartDashboard.putNumber("DT/auto_amping/pidX", pidPosCorrectieX);
-        SmartDashboard.putNumber("DT/auto_amping/pidY", pidPosCorrectieY);
-        SmartDashboard.putNumber("DT/auto_amping/profileVX", profileVX);
-        SmartDashboard.putNumber("DT/auto_amping/profileVY", profileVY);
-        SmartDashboard.putNumber("DT/auto_amping/speedx", speedX);
-        SmartDashboard.putNumber("DT/auto_amping/speedy", speedY);
-        SmartDashboard.putNumber("DT/auto_amping/frfrVX", robotSpeed.vxMetersPerSecond);
-        SmartDashboard.putNumber("DT/auto_amping/frfrVY", robotSpeed.vyMetersPerSecond);
+       // SmartDashboard.putNumber("off by in x", pidPosCorrectieX);
+       // SmartDashboard.putNumber("DT/auto_amping/pidY", pidPosCorrectieY);
+        
 
         targetPoseRotation = targetPose.getRotation().getRadians();
         currentPoseRotation = currentPose.getRotation().getRadians();
@@ -149,9 +146,19 @@ public class AutoDriveCommand {
         
 
         //Convert to chassis speed and return
-        return new ChassisSpeeds(speedX, speedY, speedRotation);
-    }
+        if (DriverStation.getAlliance().get().equals(Alliance.Red)) {
+            return new ChassisSpeeds(-speedX, -speedY, speedRotation);
+        }
 
+        else {
+            return new ChassisSpeeds(speedX, speedY, speedRotation);
+        }
+        }
+      
+        
+    
+
+   
     public void setRobotSpeed(ChassisSpeeds robotSpeed) {
         this.robotSpeed = robotSpeed;
     }

@@ -56,14 +56,14 @@ public class IntakeCommandArm extends Command {
     public boolean isFinished() {
        // startCounting = true;
         SmartDashboard.putBoolean("is timing out", Timer.getFPGATimestamp() - initTime > 2 && startCounting);
-        return (intake.CurrentintakeState.equals(Intake_states.Empty) && Timer.getFPGATimestamp() - initTime > 0.25 && startCounting) || (Timer.getFPGATimestamp() - initTime > 2 && startCounting ) || (Timer.getFPGATimestamp() - actualiniTime > 3 && intake.CurrentintakeState.equals(Intake_states.After_First));
+        return (intake.CurrentintakeState.equals(Intake_states.Empty) && Timer.getFPGATimestamp() - initTime > 0.25 && startCounting) || (Timer.getFPGATimestamp() - initTime > 2 && startCounting ) || (Timer.getFPGATimestamp() - actualiniTime > 3 && (intake.CurrentintakeState.equals(Intake_states.After_First) || intake.CurrentintakeState.equals(Intake_states.Intermediate)));
         
     }
 
     @Override
     public void end(boolean interrupted) {
 
-        if (intake.CurrentintakeState.equals(Intake_states.After_First)) {
+        if (intake.CurrentintakeState.equals(Intake_states.After_First) || intake.CurrentintakeState.equals(Intake_states.Intermediate)) {
             
             intake.setState(Intake_states.Empty);
         }

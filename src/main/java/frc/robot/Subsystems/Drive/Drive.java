@@ -51,6 +51,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Subsystems.Superstructure.Superstructure;
 
 import java.util.HashMap;
 import java.util.concurrent.locks.Lock;
@@ -574,6 +575,11 @@ private final Field2d m_field = new Field2d();
   //   return states;
   // }
 
+  public void resetGyro() {
+    int addOn = DriverStation.getAlliance().equals(Alliance.Red) ? 180 : 0;
+    gyroIO.resetGyro(Rotation2d.fromDegrees(addOn));
+  }
+
 
 
   // public void setPose(Pose2d pose) {
@@ -598,9 +604,13 @@ private final Field2d m_field = new Field2d();
     public void runVelocity(ChassisSpeeds speeds) {
       // Calculate module setpoints
       ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-      SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+      ChassisSpeeds heightLimit = getNewTargetVelocity(discreteSpeeds);
+      SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(heightLimit);
       SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, getMaxLinearSpeedMetersPerSec());
-  
+
+
+      SmartDashboard.putNumber("accel", Math.abs(VecBuilder.fill(getRobotRelativeSpeeds().vxMetersPerSecond, getRobotRelativeSpeeds().vyMetersPerSecond).minus(VecBuilder.fill(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)).norm()));
+      
       // Log unoptimized setpoints and setpoint speeds
       Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
       Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
@@ -619,6 +629,23 @@ private final Field2d m_field = new Field2d();
       for (int i = 0; i < 4; i++) {
         modules[i].runCharacterization(output);
       }
+    }
+
+
+    public ChassisSpeeds getNewTargetVelocity(ChassisSpeeds vel) {
+     Vector<N2> accel =  VecBuilder.fill(getRobotRelativeSpeeds().vxMetersPerSecond, getRobotRelativeSpeeds().vyMetersPerSecond).minus(VecBuilder.fill(vel.vxMetersPerSecond, vel.vyMetersPerSecond));
+     //ChassisSpeeds newvel = vel;
+     Vector<N2> velFixed = VecBuilder.fill(getRobotRelativeSpeeds().vxMetersPerSecond, getRobotRelativeSpeeds().vyMetersPerSecond);
+     double maxAccel = (-0.08558 * Superstructure.encoderElevator + 4.426);
+     SmartDashboard.putNumber("max Accel", maxAccel);
+     if (accel.norm() > maxAccel) {
+       accel = accel.times( maxAccel/ accel.norm());
+       velFixed = velFixed.plus(accel);
+       SmartDashboard.putNumber("resulting velocity", velFixed.norm());
+       SmartDashboard.putNumber("wanted velocity", Math.hypot(vel.vxMetersPerSecond, vel.vyMetersPerSecond));
+       return new ChassisSpeeds(velFixed.get(0), velFixed.get(1), vel.omegaRadiansPerSecond);
+     }
+      return vel;
     }
   
     /** Stops the drive. */

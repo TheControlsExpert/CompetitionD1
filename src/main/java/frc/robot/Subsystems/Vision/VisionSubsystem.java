@@ -34,9 +34,9 @@ public class VisionSubsystem extends SubsystemBase{
     public void periodic() {
         io.updateInputs(inputs);
 
-        if (inputs.isNew_LL3GF & !inputs.MT2pose_LL3GF.equals(new Pose2d()) & inputs.visionSTDs_LL3GF[0] != 0 && inputs.visionSTDs_LL3GF[1] !=0) {
+        if (inputs.isNew_LL4 & !inputs.MT2pose_LL4.equals(new Pose2d()) & inputs.visionSTDs_LL4[0] != 0 && inputs.visionSTDs_LL4[1] !=0) {
             SmartDashboard.putBoolean("adding measurement", true);
-            addVisionMeasurement(inputs.MT2pose_LL3GF, inputs.time_LL3GF, inputs.visionSTDs_LL3GF);
+            addVisionMeasurement(inputs.MT2pose_LL4, inputs.time_LL4, inputs.visionSTDs_LL4);
         }
 
         else {
@@ -54,12 +54,12 @@ public class VisionSubsystem extends SubsystemBase{
         Vector<N2> stds = VecBuilder.fill(std[0] * 2.5, std[1] * 2.5);
         SmartDashboard.putNumber("translation diff", pose.minus(drive.getEstimatedPosition()).getTranslation().getNorm());
 
-        if (pose.minus(drive.getEstimatedPosition()).getTranslation().getNorm() < 1) {
+        //if (pose.minus(drive.getEstimatedPosition()).getTranslation().getNorm() < 1) {
 
         
         
-        //drive.addVision(pose, timestamp, std);
-        }
+        drive.addVision(pose, timestamp, std);
+       // }
        //field.setRobotPose(new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(-drive.getRotationLL())));
 
         }

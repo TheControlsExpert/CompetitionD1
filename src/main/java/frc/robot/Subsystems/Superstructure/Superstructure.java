@@ -40,6 +40,9 @@ public class Superstructure extends SubsystemBase {
     private boolean hasScheduledYet = false;
     public boolean hasDoneIntakeTest = false;
 
+    public static double encoderElevator = 0;
+    
+
 
     private SuperstructureState desired_state = SuperstructureState.HOME_UP;
     private SuperstructureState current_state = SuperstructureState.INITIAL;
@@ -87,10 +90,10 @@ public class Superstructure extends SubsystemBase {
 
 
      // graph.addEdge(SuperstructureState.L1_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
-      //graph.addEdge(SuperstructureState.L2_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(0, 0, 0, Optional.of(false), Optional.of(false)));
+      graph.addEdge(SuperstructureState.L2_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.of(false), Optional.of(false)));
       graph.addEdge(SuperstructureState.L3_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5 , 20, 0, Optional.of(false), Optional.of(false)));
       graph.addEdge(SuperstructureState.L4_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.of(false), Optional.of(false)));
-
+      graph.addEdge(SuperstructureState.L1_EJECTED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.of(false), Optional.of(false)));
 
       //edges going for scoring
 
@@ -106,13 +109,17 @@ public class Superstructure extends SubsystemBase {
 
       graph.addEdge(SuperstructureState.L3_STOWED, SuperstructureState.L3_EJECTED, new SuperstructureCommandInfo(9.17, 25, 0, Optional.of(false), Optional.of(true)));
       graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L3_STOWED, new SuperstructureCommandInfo(12, 38, 0, Optional.of(true), Optional.of(true)));
-      graph.addEdge(SuperstructureState.L4_STOWED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.empty(), Optional.of(true)));
+      graph.addEdge(SuperstructureState.L3_STOWED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.empty(), Optional.of(true)));
 
       //going into intermediate 
 
       graph.addEdge(SuperstructureState.L2_STOWED, SuperstructureState.L2_EJECTED, new SuperstructureCommandInfo(9.17, 15, 0, Optional.of(false), Optional.of(true)));
-      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L2_STOWED, new SuperstructureCommandInfo(12, 25, 0, Optional.of(true), Optional.of(true)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L2_STOWED, new SuperstructureCommandInfo(12, 20, 0, Optional.of(true), Optional.of(true)));
       graph.addEdge(SuperstructureState.L2_STOWED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.empty(), Optional.of(true)));
+
+      graph.addEdge(SuperstructureState.L1_STOWED, SuperstructureState.L1_EJECTED, new SuperstructureCommandInfo(-5, 29.5, 16, Optional.of(true), Optional.of(true)));
+      graph.addEdge(SuperstructureState.HOME_UP, SuperstructureState.L1_STOWED, new SuperstructureCommandInfo(-5, 29.5, 16, Optional.of(true), Optional.of(true)));
+      graph.addEdge(SuperstructureState.L1_STOWED, SuperstructureState.HOME_UP, new SuperstructureCommandInfo(17.5, 20, 0, Optional.empty(), Optional.of(true)));
 
 
       graph.addEdge(SuperstructureState.INTAKE, SuperstructureState.INTERMEDIATE, new SuperstructureCommandInfo(-18, 41, 0, Optional.empty(), Optional.of(true)));
@@ -171,6 +178,7 @@ public class Superstructure extends SubsystemBase {
       SmartDashboard.putString("manual mode", manualMode.toString());
       wristIO.updateInputs(wristInputs, manualMode);
       elevatorIO.updateInputs(elevatorInputs, DesiredManualMode);
+      encoderElevator = elevatorInputs.encoderRotations_L;
 
       if (manualMode.equals(ManualMode.AUTOMATIC) && DesiredManualMode.equals(ManualMode.AUTOMATIC)) {
       SmartDashboard.putNumber("setpoint elevator", following_edge.elevatorEncoderRots);
@@ -272,7 +280,7 @@ public class Superstructure extends SubsystemBase {
 
         }
 
-        if (current_state.equals(SuperstructureState.INTAKE) || current_state.equals(SuperstructureState.GROUND_INTAKE) ) {
+        if (desired_state.equals(SuperstructureState.INTAKE) || current_state.equals(SuperstructureState.GROUND_INTAKE) || current_state.equals(SuperstructureState.INTAKE))  {
           wristIO.setOutputOpenLoop(-0.35);
           SmartDashboard.putNumber("are we moving the intake", 1);
           
@@ -282,7 +290,7 @@ public class Superstructure extends SubsystemBase {
         else if (current_state.equals(SuperstructureState.EJECT)) {
           wristIO.setOutputOpenLoop(0.2);
         }
-
+    
          else if (((desired_state.equals(SuperstructureState.L1_EJECTED) || desired_state.equals(SuperstructureState.L2_EJECTED) || desired_state.equals(SuperstructureState.L3_EJECTED) || desired_state.equals(SuperstructureState.L4_EJECTED)) && hasCoral && (current_state == desired_state || Math.abs(wristInputs.armAngle - graph.getEdge(current_state, desired_state).pivotPos) < 1)))
           {       
            wristIO.setOutputOpenLoop(0.1);
@@ -292,7 +300,7 @@ public class Superstructure extends SubsystemBase {
         ) {
 
         }
-
+ 
         // else if (hasCoral) {
         //   wristIO.setOutputOpenLoop(-0.1);
         // }
