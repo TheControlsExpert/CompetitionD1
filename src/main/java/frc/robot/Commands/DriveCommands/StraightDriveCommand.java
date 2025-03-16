@@ -1,4 +1,4 @@
-package frc.robot.Commands;
+package frc.robot.Commands.DriveCommands;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
@@ -13,6 +13,7 @@ public class StraightDriveCommand extends Command{
     public StraightDriveCommand(double time, Drive drive) {
         this.time = time;
         this.drive = drive;
+           addRequirements(drive);
     }
 
     @Override
@@ -23,7 +24,7 @@ public class StraightDriveCommand extends Command{
 
     @Override
     public void execute() {
-        drive.runVelocity(new ChassisSpeeds(2, 0, 0));
+        drive.runVelocity(new ChassisSpeeds(-2, 0, 0));
     }
 
 

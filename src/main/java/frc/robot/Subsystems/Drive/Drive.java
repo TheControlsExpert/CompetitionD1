@@ -51,7 +51,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.SwerveConstants;
-import frc.robot.Subsystems.Superstructure.Superstructure;
+//import frc.robot.Subsystems.Superstructure.Superstructure;
 
 import java.util.HashMap;
 import java.util.concurrent.locks.Lock;
@@ -110,11 +110,11 @@ private double std_valy = 0;
 private double diff_x = 0;
 private double diff_y = 0;
 
-public double stdX = 0.1;
-public double stdY = 0.1;
+public double stdX = 100;
+public double stdY = 100;
 
-public double stdX_odom = 0.1;
-public double stdY_odom = 0.1;
+public double stdX_odom = 100;
+public double stdY_odom = 100;
 
 
 public double tester = 0.1;
@@ -294,7 +294,14 @@ private final Field2d m_field = new Field2d();
       
         @Override
         public void periodic() {
-          m_field.setRobotPose(estimatedPose);
+          if (stdX < 0.01 && DriverStation.isDisabled()) {
+            stdX = 0.001;
+          }
+
+          if (stdY < 0.01 && DriverStation.isDisabled()) {
+            stdY = 0.001;
+          }
+         m_field.setRobotPose(estimatedPose);
           tester += 0.1;
           SmartDashboard.putNumber("tester", tester);
           //SmartDashboard.putNumber("bop bop", numTimes);
@@ -582,14 +589,18 @@ private final Field2d m_field = new Field2d();
 
 
 
-  // public void setPose(Pose2d pose) {
+  //public void setPose(Pose2d pose) {
   //   poseLock.lock();
   //   poseBuffer.clear();
   //   odometryPose = pose;
   //   lastodometrypose = pose;
   //   estimatedPose = pose;
-  //   std = new double[]{0.1, 0.1};
-  //   std_odom = new double[]{0.1, 0.1};
+  //   stdX = 0.2;
+  //   stdY = 0.2;
+
+  //   stdX_odom = 0.2;
+  //   stdY_odom = 0.2;
+
   //   poseLock.unlock();
   // }
       
@@ -604,9 +615,9 @@ private final Field2d m_field = new Field2d();
     public void runVelocity(ChassisSpeeds speeds) {
       // Calculate module setpoints
       ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-      ChassisSpeeds heightLimit = getNewTargetVelocity(discreteSpeeds);
-      SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(heightLimit);
-      SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, getMaxLinearSpeedMetersPerSec());
+     // ChassisSpeeds heightLimit = getNewTargetVelocity(discreteSpeeds);
+      SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+      SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, getMaxLinearSpeedMetersPerSec() / 1.5);
 
 
       SmartDashboard.putNumber("accel", Math.abs(VecBuilder.fill(getRobotRelativeSpeeds().vxMetersPerSecond, getRobotRelativeSpeeds().vyMetersPerSecond).minus(VecBuilder.fill(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)).norm()));
@@ -632,21 +643,21 @@ private final Field2d m_field = new Field2d();
     }
 
 
-    public ChassisSpeeds getNewTargetVelocity(ChassisSpeeds vel) {
-     Vector<N2> accel =  VecBuilder.fill(getRobotRelativeSpeeds().vxMetersPerSecond, getRobotRelativeSpeeds().vyMetersPerSecond).minus(VecBuilder.fill(vel.vxMetersPerSecond, vel.vyMetersPerSecond));
-     //ChassisSpeeds newvel = vel;
-     Vector<N2> velFixed = VecBuilder.fill(getRobotRelativeSpeeds().vxMetersPerSecond, getRobotRelativeSpeeds().vyMetersPerSecond);
-     double maxAccel = (-0.08558 * Superstructure.encoderElevator + 4.426);
-     SmartDashboard.putNumber("max Accel", maxAccel);
-     if (accel.norm() > maxAccel) {
-       accel = accel.times( maxAccel/ accel.norm());
-       velFixed = velFixed.plus(accel);
-       SmartDashboard.putNumber("resulting velocity", velFixed.norm());
-       SmartDashboard.putNumber("wanted velocity", Math.hypot(vel.vxMetersPerSecond, vel.vyMetersPerSecond));
-       return new ChassisSpeeds(velFixed.get(0), velFixed.get(1), vel.omegaRadiansPerSecond);
-     }
-      return vel;
-    }
+    // public ChassisSpeeds getNewTargetVelocity(ChassisSpeeds vel) {
+    //  Vector<N2> accel =  VecBuilder.fill(getRobotRelativeSpeeds().vxMetersPerSecond, getRobotRelativeSpeeds().vyMetersPerSecond).minus(VecBuilder.fill(vel.vxMetersPerSecond, vel.vyMetersPerSecond));
+    //  //ChassisSpeeds newvel = vel;
+    //  Vector<N2> velFixed = VecBuilder.fill(getRobotRelativeSpeeds().vxMetersPerSecond, getRobotRelativeSpeeds().vyMetersPerSecond);
+    //  //double maxAccel = (-0.08558 * Superstructure.encoderElevator + 4.426);
+    //  //SmartDashboard.putNumber("max Accel", maxAccel);
+    //  if (accel.norm() > maxAccel) {
+    //    accel = accel.times( maxAccel/ accel.norm());
+    //    velFixed = velFixed.plus(accel);
+    //    SmartDashboard.putNumber("resulting velocity", velFixed.norm());
+    //    SmartDashboard.putNumber("wanted velocity", Math.hypot(vel.vxMetersPerSecond, vel.vyMetersPerSecond));
+    //    return new ChassisSpeeds(velFixed.get(0), velFixed.get(1), vel.omegaRadiansPerSecond);
+    //  }
+    //   return vel;
+    // }
   
     /** Stops the drive. */
     public void stop() {
@@ -792,7 +803,8 @@ private final Field2d m_field = new Field2d();
       
 
        stdY = 1 / Math.sqrt(1/(visionstds[1] * visionstds[1]) + 1/(stdY * stdY));
-      
+
+
 
       //  diff_x = std_valx - stds_at_time[0];
       //  diff_y = std_valy - stds_at_time[1];
@@ -864,7 +876,7 @@ private final Field2d m_field = new Field2d();
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {
-    return 5;
+    return 3;
   }
 
   /** Returns the maximum angular speed in radians per sec. */

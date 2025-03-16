@@ -43,6 +43,9 @@ public interface VisionIO {
        // public boolean isConnected_LL3GF = false;
         public double[] visionSTDs_LL4 = new double[3];
 
+        public double xOffset = 0.0;
+        public double yOffset = 0.0;
+
        
 
        

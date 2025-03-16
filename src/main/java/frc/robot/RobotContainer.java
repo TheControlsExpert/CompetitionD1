@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -35,22 +37,27 @@ import frc.robot.Constants.SwerveConstants.Mod0;
 import frc.robot.Constants.SwerveConstants.Mod1;
 import frc.robot.Constants.SwerveConstants.Mod2;
 import frc.robot.Constants.SwerveConstants.Mod3;
-import frc.robot.Commands.AutoDriveCommand;
-import frc.robot.Commands.AutoScoreAimCommand;
-import frc.robot.Commands.AutoSourcingCommand;
-import frc.robot.Commands.AutonomousL4;
-import frc.robot.Commands.DriveCommand;
-import frc.robot.Commands.FeedforwardCharacterization;
-import frc.robot.Commands.IntakingCommand;
-import frc.robot.Commands.StraightDriveCommand;
+import frc.robot.Robot.ReefMode;
+import frc.robot.Commands.DriveCommands.AutoDriveCommand;
+import frc.robot.Commands.DriveCommands.DriveCommand;
+import frc.robot.Commands.DriveCommands.FeedforwardCharacterization;
+import frc.robot.Commands.DriveCommands.StraightDriveCommand;
+import frc.robot.Commands.ElevatorArmCommands.EjectCommand;
+import frc.robot.Commands.ElevatorArmCommands.IntakeCommand;
+import frc.robot.Commands.ElevatorArmCommands.CoralPrepCommand;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Drive.GyroIONavX;
 import frc.robot.Subsystems.Drive.ModuleIOTalonFX;
-import frc.robot.Subsystems.Intake.Intake;
+
 import frc.robot.Subsystems.Superstructure.ElevatorIOKrakens;
 import frc.robot.Subsystems.Superstructure.Superstructure;
 import frc.robot.Subsystems.Superstructure.WristIOKrakens;
 import frc.robot.Subsystems.Superstructure.Superstructure.ManualMode;
+import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
+// import frc.robot.Subsystems.Superstructure.ElevatorIOKrakens;
+// import frc.robot.Subsystems.Superstructure.Superstructure;
+// import frc.robot.Subsystems.Superstructure.WristIOKrakens;
+// import frc.robot.Subsystems.Superstructure.Superstructure.ManualMode;
 import frc.robot.Subsystems.Vision.VisionIO_Limelight;
 import frc.robot.Subsystems.Vision.VisionSubsystem;
 
@@ -71,19 +78,21 @@ import com.pathplanner.lib.path.PathConstraints;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Intake intake; 
-
+  
  private final PathConstraints constraints;
   private Command pathfindingCommand;
+  private final SendableChooser<Command> autoChooser;
 
 
-  public static Spark leds = new Spark(0);
+  //public static Spark leds = new Spark(0);
 
        
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  public final GenericHID LevelsController = new GenericHID(1);
+  public final GenericHID PositionsController = new GenericHID(2);
   private final AutoDriveCommand driver = new AutoDriveCommand(2, 0.03, 0, 1);
-  Superstructure superstructure;
+  //Superstructure superstructure;
 
   private boolean isFlipped =
   DriverStation.getAlliance().isPresent()
@@ -101,7 +110,11 @@ public class RobotContainer {
       
         /** The container for the robot. Contains subsystems, OI devices, and commands. */
         public RobotContainer() {
-         this.intake = new Intake();
+          autoChooser = AutoBuilder.buildAutoChooser();
+          
+          SmartDashboard.putData("Auto Chooser", autoChooser);
+
+        // this.intake = new Intake();
           this.gyro = new GyroIONavX();
         
             // Real robot, instantiate hardware IO implementations
@@ -113,7 +126,7 @@ public class RobotContainer {
                     new ModuleIOTalonFX(Mod2.constants, 2),
                     new ModuleIOTalonFX(Mod3.constants, 3));
     
-            superstructure = new Superstructure(new WristIOKrakens(), new ElevatorIOKrakens(), drive);        
+          // superstructure = new Superstructure(new WristIOKrakens(), new ElevatorIOKrakens());        
            
     
             VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
@@ -165,9 +178,45 @@ public class RobotContainer {
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
                 () -> -controller.getRightX(),
-                drive));
+                drive,
+                controller));
+
+        // controller.leftStick().     
+        
+      //  controller.leftBumper().whileTrue(Commands.either(Commands.startEnd(() -> {superstructure.setIntakeManual(0.2);}, () -> {superstructure.setIntakeManual(0);}, superstructure.intake),
+        //                                                   new IntakeCommand(superstructure), 
+        //                                                  () -> (superstructure.getManualMode().equals(ManualMode.MANUAL))));
+        // controller.leftTrigger().and(() -> (superstructure.hasCoral)).whileTrue(new PrepCommand(superstructure, controller));
+        // controller.rightTrigger().and(() -> (superstructure.hasCoral)).whileTrue(new EjectCommand(superstructure));
+        // controller.x().whileTrue(Commands.run(() -> 
+      
+        //   drive.runVelocity(
+        //       ChassisSpeeds.fromFieldRelativeSpeeds(
+        //         driver.getTargetSpeeds(drive.getEstimatedPosition(), Robot.reefMode.equals(ReefMode.CORAL) ? RobotState.getInstance().getScoringPose() : RobotState.getInstance().getAlgaePose()),
+                  
+        //         isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI))
+        //               : drive.getRotation())), drive));
+
+
+        //controller.rightBumper().onTrue(Commands.runOnce(() -> { boolean whichSwitch = superstructure.getManualMode().equals(ManualMode.AUTOMATIC); if (whichSwitch) {superstructure.setManualMode(ManualMode.MANUAL); superstructure.setIntakeManual(0);} else {superstructure.setManualMode(ManualMode.AUTOMATIC); superstructure.setDesiredState(SuperstructureState.HOME_UP); superstructure.setIntakeManual(0);}}, superstructure));
+        //controller.y().and(() -> superstructure.getManualMode().equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
+        //controller.a().and(() -> superstructure.getManualMode().equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(-0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
+        
+
+       // controller.button(7).onTrue(Commands.runOnce(() -> {drive.resetGyro();}, drive));
+        
+        
+
+        
     
+
+                                                          
+
+        
     
+       
+
+        
     //     controller.b().whileTrue(Commands.run(() -> 
       
     // drive.runVelocity(
@@ -177,32 +226,37 @@ public class RobotContainer {
     //        isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI))
     //             : drive.getRotation())), drive));
     
-    //controller.x().whileTrue(pathfindingCommand);
-    
-    controller.leftBumper().whileTrue(new AutoSourcingCommand(drive, superstructure, intake, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
-    controller.leftTrigger().whileTrue(Commands.either(new AutoScoreAimCommand(drive, superstructure, controller, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()), 
-                                      Commands.runEnd(() -> {superstructure.setIntakeManual(0.2);}, () -> {superstructure.setIntakeManual(0);}, superstructure), 
-                                      () -> (!superstructure.DesiredManualMode.equals(ManualMode.MANUAL))));
+   // controller.x().whileTrue(Commands.runEnd(() -> {intake.setState(Intake_states.Bofore_First);}, () -> {intake.setState(Intake_states.Ready);}, intake));
     
     
-    controller.x().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setIntakeManual(-0.2);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setIntakeManual(0);}, superstructure));
+    //controller.leftBumper().whileTrue(new AutoSourcingCommand(drive, superstructure, intake, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+    //controller.leftTrigger().whileTrue(Commands.either(new AutoScoreAimCommand( superstructure, controller, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()), 
+                                //      Commands.runEnd(() -> {superstructure.setIntakeManual(0.2);}, () -> {superstructure.setIntakeManual(0);}, superstructure), 
+                                //      () -> (!superstructure.DesiredManualMode.equals(ManualMode.MANUAL));
     
+    
+    //controller.x().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setIntakeManual(-0.2);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setIntakeManual(0);}, superstructure));
+    //controller.x().onTrue(Commands.runOnce(() -> {drive.setPose(new Pose2d());}, drive));
     //MANUAL MODES
     
-    controller.povUp().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setElevatorManual(0.2);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setElevatorManual(0);}, superstructure));
-    controller.povDown().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setElevatorManual(-0.1);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setElevatorManual(0);}, superstructure));
-    controller.povRight().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setWristManual(0.3);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setWristManual(0);}, superstructure));
-    controller.povLeft().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setWristManual(-0.3);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setWristManual(0);}, superstructure));
+    //controller.povUp().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setElevatorManual(0.35);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setElevatorManual(0);}, superstructure));
+    //controller.povDown().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setElevatorManual(-0.25);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setElevatorManual(0);}, superstructure));
+    //controller.povRight().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setWristManual(0.3);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setWristManual(0);}, superstructure));
+   // controller.povLeft().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setWristManual(-0.3);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setWristManual(0);}, superstructure));
     
-    controller.y().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
-    controller.a().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(-0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
+    //controller.y().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
+    //controller.a().and(() -> superstructure.DesiredManualMode.equals(ManualMode.MANUAL)).whileTrue(new InstantCommand(() -> {superstructure.setPivotManual(-0.1 * 12);}, superstructure)).onFalse(new InstantCommand(() -> {superstructure.setPivotManual(0);}, superstructure));
         
     
-    controller.rightBumper().onTrue(Commands.runOnce(() -> { boolean whichSwitch = superstructure.getManualMode().equals(ManualMode.AUTOMATIC); if (whichSwitch) {superstructure.setDesiredManualMode(ManualMode.MANUAL);} else {superstructure.setDesiredManualMode(ManualMode.AUTOMATIC);}}, superstructure));
+    //controller.rightBumper().onTrue(Commands.runOnce(() -> { boolean whichSwitch = superstructure.getManualMode().equals(ManualMode.AUTOMATIC); if (whichSwitch) {superstructure.setDesiredManualMode(ManualMode.MANUAL);} else {superstructure.setDesiredManualMode(ManualMode.AUTOMATIC); superstructure.setDesiredState(SuperstructureState.HOME_UP)}}, superstructure));
     
-    controller.b().onTrue(Commands.runOnce(() -> {drive.resetGyro();}, drive));
+    //controller.b().onTrue(Commands.runOnce(() -> {drive.resetGyro();}, drive));
 
    // controller.b().whileTrue(pathfindingCommand)
+
+   JoystickButton seventeen = new JoystickButton(LevelsController, 6);
+   seventeen.onTrue(Commands.runOnce(() -> {drive.resetGyro();}, drive).ignoringDisable(true));
+      }
       
   
 // controller.y().whileTrue(
@@ -251,15 +305,14 @@ public class RobotContainer {
     //                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
     //                 drive)
     //             .ignoringDisable(true));
-  }
-
+  
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
+   *                                                                                                                                                                                                                                                                                                                                                                                                                                          
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new SequentialCommandGroup(new StraightDriveCommand(2, drive), new AutonomousL4(drive, superstructure));
+    return autoChooser.getSelected();
 }
 
 

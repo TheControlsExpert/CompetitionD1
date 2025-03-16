@@ -189,31 +189,11 @@ public final class Constants {
     //BLUE
 
 
-    //reef
-    public static final Translation2d reefA = new Translation2d(0,0);
-    public static final Translation2d reefB = new Translation2d(0,0);
-
-    public static final Translation2d reefC = new Translation2d(0,0);
-    public static final Translation2d reefD = new Translation2d(0,0);
-
-    public static final Translation2d reefE = new Translation2d(0,0);
-    public static final Translation2d reefF = new Translation2d(0,0);
-
-    public static final Translation2d reefG = new Translation2d(0,0);
-    public static final Translation2d reefH = new Translation2d(0,0);
-
-    public static final Translation2d reefI = new Translation2d(0,0);
-    public static final Translation2d reefJ = new Translation2d(0,0);
-
-    public static final Translation2d reefK = new Translation2d(0,0);
-    public static final Translation2d reefL = new Translation2d(0,0);
-    public static final Pose2d RightSource_BLUE = null;
-    public static final Pose2d LeftSource_BLUE = null;
-
-    public static final Pose2d RightSource_RED = null;
-    public static final Pose2d LeftSource_RED = null;
-
     
+    public static final Pose2d RightSource_BLUE = new Pose2d(1.277, 6.999, Rotation2d.fromDegrees(180 - 55));
+    public static final Pose2d LeftSource_BLUE = new Pose2d(1.277, 1.053, Rotation2d.fromDegrees(-125));
+    public static final double REEF_Y_OFFSET = 0;
+    public static final double REEF_X_OFFSET = 0;
 
 
 
@@ -248,6 +228,8 @@ public final class Constants {
 
     public static final double minHeightAccel = 4.5;
     public static final double minHeight = 0.5;
+    public static final double minHeightforL4Pivot = 0;
+    public static final double minHeightAboveHome = 0;
 
 
   }

@@ -1,4 +1,4 @@
-package frc.robot.Commands;
+package frc.robot.Commands.DriveCommands;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -12,6 +12,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.Drive.Drive;
 
 public class DriveCommand extends Command {
@@ -20,22 +21,38 @@ public class DriveCommand extends Command {
     private DoubleSupplier ySupplier;
     private Drive swervyyy;
     private DoubleSupplier rotationSupplier;
+    CommandXboxController controller;
         
-    public DriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotationSupplier, Drive swervyyy) {
+    public DriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotationSupplier, Drive swervyyy, CommandXboxController controller) {
         this.xSupplier = xSupplier;
         this.ySupplier = ySupplier;
         this.swervyyy = swervyyy;
         this.rotationSupplier = rotationSupplier;
+        this.controller = controller;
         addRequirements(swervyyy);
     }
 
     @Override
     public void execute() {
-         Translation2d linearVelocity =
+        Translation2d linearVelocity;
+
+        if (controller.rightStick().getAsBoolean()) {
+          linearVelocity =
+                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble() / 12, ySupplier.getAsDouble() / 12);
+        }
+
+        else {
+            linearVelocity =
                   getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+        }
 
               // Calculate angular speed
               double omega = MathUtil.applyDeadband(rotationSupplier.getAsDouble(), 0.1);
+
+         if (controller.rightStick().getAsBoolean()) {
+             omega = omega / 12;
+         }
 
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);

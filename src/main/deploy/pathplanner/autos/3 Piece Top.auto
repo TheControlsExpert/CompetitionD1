@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3 Piece Top PT1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3 Piece Top PT2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3 Piece Top PT3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3 Piece Top PT4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3 Piece Top PT5"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

@@ -84,7 +84,7 @@ public class ElevatorIOKrakens implements ElevatorIO {
 
 
         SmartDashboard.putNumber("elevator speed", motorL.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("setpoint tracker for elevator", encoderPos);
+        SmartDashboard.putNumber("setpoint tracker for elevator", setpointPosition);
 
         if (mode.equals(ManualMode.AUTOMATIC)) {
 

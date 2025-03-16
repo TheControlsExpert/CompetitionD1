@@ -142,7 +142,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     cancoder.getConfigurator().apply(config, 0.25);
     turnTalon.getConfigurator().apply(turnConfig, 0.25);
      //turnTalon.setPosition(cancoder.getPosition().getValueAsDouble() - constants.angleOffset() );
-   turnTalon.setPosition(0);
+  turnTalon.setPosition(0);
 
 
     // turnTalon.setPosition(

@@ -41,6 +41,7 @@ public interface WristIO {
     default void setOutputOpenLoopWrist(double output) {
     }
 
+    default void keepStill() {}
 
 
     

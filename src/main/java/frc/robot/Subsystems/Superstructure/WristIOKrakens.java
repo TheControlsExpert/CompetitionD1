@@ -35,6 +35,7 @@ public class WristIOKrakens implements WristIO {
     private SparkFlex armIntakeMotor = new SparkFlex(17, MotorType.kBrushless);
     //make sure channel match roborio channels
     private DutyCycleEncoder armEncoder = new DutyCycleEncoder(0);
+    boolean hasStartedPID = false;
     //put actual port for it
    // private DigitalInput limitSwitch = new DigitalInput(0);
     double setpointangle = 17.5;
@@ -43,10 +44,9 @@ public class WristIOKrakens implements WristIO {
 
     private double output = 0.0;
 
-    double kv = 0.003;
-    double ks = 0.017;
-    double offset = 0.455;
-    double kg = 0.017;
+
+    double offset = 0.4990;
+    
 
    
     //private PositionVoltage positionRequester = new PositionVoltage(0);
@@ -83,7 +83,7 @@ public class WristIOKrakens implements WristIO {
 
         //intake config
 
-        armIntakeMotor.configure(new SparkFlexConfig().idleMode(IdleMode.kCoast).inverted(false), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        armIntakeMotor.configure(new SparkFlexConfig().apply(new ClosedLoopConfig().p(0.1)), com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
 
           
@@ -107,32 +107,30 @@ public class WristIOKrakens implements WristIO {
         SmartDashboard.putNumber("Arm Angle Theoretical", inputs.pivotEncoderAbs);
         SmartDashboard.putNumber("Arm angle actual", pivotMotor.getEncoder().getPosition());
 
-        if (mode.equals(ManualMode.AUTOMATIC)) {
+        // if (mode.equals(ManualMode.AUTOMATIC)) {
             SmartDashboard.putBoolean("r we doing automatic for the arm", true);
-        double setpoint = profiler_racial.calculate(pivotMotor.getEncoder().getPosition(), setpointangle);
-        double setpoint2 = profiler_new.calculate(setpointangle);
-   
+        pivotMotor.getClosedLoopController().setReference(setpointangle, ControlType.kPosition, ClosedLoopSlot.kSlot0, 12 * 0.018 * Math.cos(Units.rotationsToRadians(inputs.pivotEncoderAbs - offset)), ArbFFUnits.kVoltage);
     SmartDashboard.putNumber("setpoint",  profiler_racial.getSetpoint().velocity * 60 );
     SmartDashboard.putNumber("setpoint angle is act set", setpointangle );
    // SmartDashboard.putNumber("velocity pivot",  pivot.getEncoder().getVelocity());
    
        //  motorL.set(0.05);
-        pivotMotor.getClosedLoopController().setReference(profiler_racial.getSetpoint().velocity * 60, ControlType.kVelocity, ClosedLoopSlot.kSlot0, 12 * (Math.signum(profiler_racial.getSetpoint().velocity) * ks)  +  12 * (kg * Math.cos(Units.rotationsToRadians(armEncoder.get() - offset))) + kv * profiler_racial.getSetpoint().velocity * 60 + setpoint, ArbFFUnits.kVoltage);
+        
         }
 
-        else {
+        // else {
 
-            if (pivotMotor.getEncoder().getPosition() > 22 || pivotMotor.getEncoder().getPosition() < -22) {
-                output = 0;
-            }
-            SmartDashboard.putBoolean("r we doing automatic for the arm bubbles", false);
+        //     if (pivotMotor.getEncoder().getPosition() > 22 || pivotMotor.getEncoder().getPosition() < -22) {
+        //         output = 0;
+        //     }
+        //     SmartDashboard.putBoolean("r we doing automatic for the arm bubbles", false);
 
-            pivotMotor.getClosedLoopController().setReference(0, ControlType.kVelocity, ClosedLoopSlot.kSlot0,  12 * (kg * Math.cos(Units.rotationsToRadians(armEncoder.get() - offset))) + output, ArbFFUnits.kVoltage);
+        //     pivotMotor.getClosedLoopController().setReference(0, ControlType.kVelocity, ClosedLoopSlot.kSlot0,  12 * (kg * Math.cos(Units.rotationsToRadians(armEncoder.get() - offset))) + output, ArbFFUnits.kVoltage);
 
 
-        }
+        // }
 
-    }
+    
 
     public void setVerticalAngle(double angle) {
 
@@ -158,11 +156,15 @@ public class WristIOKrakens implements WristIO {
 
     public void setOutputOpenLoop(double output) {
         //use to reset position
-        armIntakeMotor.set(output);
+        armIntakeMotor.getClosedLoopController().setReference(output, ControlType.kDutyCycle);
+        hasStartedPID = false;
     }
 
-    public void setIntakeOutput(double output) {
-        armIntakeMotor.set(output);
+    public void keepStill() {
+        if (!hasStartedPID) {
+        armIntakeMotor.getClosedLoopController().setReference(armIntakeMotor.getEncoder().getPosition(), ControlType.kPosition);
+        hasStartedPID = true;
+        }
     }
 
     

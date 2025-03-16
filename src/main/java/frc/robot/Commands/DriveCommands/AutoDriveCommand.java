@@ -1,4 +1,4 @@
- package frc.robot.Commands;
+ package frc.robot.Commands.DriveCommands;
 
 
 import edu.wpi.first.math.MathSharedStore;
@@ -63,7 +63,7 @@ public class AutoDriveCommand {
         // autoAmpPosePublisher = NetworkTableInstance.getDefault()
         //         .getStructTopic("Vision/autoAmpRobotPose", Pose2d.struct).publish();
 
-        pidConstants = new TrapezoidProfile.Constraints(PID_PROFILE_MAX_VELOCITY, PID_PROFILE_MAX_ACCELERATION);
+        pidConstants = new TrapezoidProfile.Constraints(PID_PROFILE_MAX_VELOCITY/8, PID_PROFILE_MAX_ACCELERATION/5);
         pidDriveToPosX = new ProfiledPIDController(kPtranslation, 0, 0, pidConstants);
         pidDriveToPosY = new ProfiledPIDController(kPtranslation, 0, 0, pidConstants);
        
@@ -154,6 +154,8 @@ public class AutoDriveCommand {
             return new ChassisSpeeds(speedX, speedY, speedRotation);
         }
         }
+
+        
       
         
     

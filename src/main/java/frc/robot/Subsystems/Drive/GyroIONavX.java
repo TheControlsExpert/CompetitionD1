@@ -19,14 +19,20 @@ public class GyroIONavX implements GyroIO {
   private final BuiltInAccelerometer accelerometer = new BuiltInAccelerometer();
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
-  double rotation_offset = 0;
+  double rotation_offset =  0;
+  double addON = 0;
   // private final Queue<Double> jerkXQueue;
   // private final Queue<Double> jerkYQueue;
   private boolean resetHasntHappened = false;
+  private boolean hasResetLL4 = false;
 
   public GyroIONavX() {
+
     
-    
+    LimelightHelpers.SetIMUMode("limelight-four", 1);
+   // LimelightHelpers.SetRobotOrientation("limelight-four", -navX.getYaw() + 20 + addON, 0 ,0 ,0 ,0 ,0 );
+
+
     SmartDashboard.putNumber("reset pos", navX.getYaw());
     
     yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
@@ -62,9 +68,16 @@ public class GyroIONavX implements GyroIO {
       resetHasntHappened = true;
     }
 
-    SmartDashboard.putNumber("gyro actual", navX.getYaw());
+    SmartDashboard.putNumber("gyro actual", -navX.getYaw()  + rotation_offset + addON);
     inputs.connected = navX.isConnected();
-    double addON = DriverStation.getAlliance().equals(DriverStation.Alliance.Red) ? 180 : 0;
+    if (DriverStation.getAlliance().isPresent()) {
+     addON = DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red) ? 180 : 0;
+     if (!hasResetLL4) {
+      hasResetLL4 = true;
+      LimelightHelpers.SetRobotOrientation("limelight-four", -navX.getYaw() + 17.6 + addON, 0 ,0 ,0 ,0 ,0 );
+      LimelightHelpers.SetIMUMode("limelight-four", 4);
+     }
+    }
     inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw()  + rotation_offset + addON);
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());
 
@@ -79,12 +92,11 @@ public class GyroIONavX implements GyroIO {
      inputs.odometryaccelYpositions = accelerometer.getY();
     
         
-    LimelightHelpers.SetRobotOrientation("limelight-threegf", -navX.getYaw() + rotation_offset  - 13 , 0 ,0 ,0 ,0 ,0 );
-
-    LimelightHelpers.SetRobotOrientation("limelight-threegs", -navX.getYaw() + rotation_offset + 180 + 13 , 0 ,0 ,0 ,0 ,0 );
-    LimelightHelpers.SetRobotOrientation("limelight-four", -navX.getYaw() + rotation_offset + 20 + addON, 0 ,0 ,0 ,0 ,0 );
+    LimelightHelpers.SetRobotOrientation("limelight-threegf", -navX.getYaw() + rotation_offset + addON , 0 ,0 ,0 ,0 ,0 );
+    LimelightHelpers.SetRobotOrientation("limelight-threegs", -navX.getYaw() + rotation_offset + addON , 0 ,0 ,0 ,0 ,0 );
+    LimelightHelpers.SetRobotOrientation("limelight-four", -navX.getYaw() + rotation_offset  + addON, 0 ,0 ,0 ,0 ,0 );
     SmartDashboard.putBoolean("setting robot orientation", true);
-    SmartDashboard.putNumber("reset pos",  -navX.getYaw() + rotation_offset + 180 - 13 + addON);
+    SmartDashboard.putNumber("reset pos",  -navX.getYaw() - 13 + rotation_offset);
     yawTimestampQueue.clear();
     yawPositionQueue.clear();
   }
