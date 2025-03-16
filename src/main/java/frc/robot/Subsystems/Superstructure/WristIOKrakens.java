@@ -60,7 +60,7 @@ public class WristIOKrakens implements WristIO {
 
         SparkFlexConfig config = new SparkFlexConfig();
         config.idleMode(IdleMode.kBrake);
-        config.apply(new ClosedLoopConfig().p(0.000));
+        config.apply(new ClosedLoopConfig().p(0.05));
        // config.
 
 
@@ -83,13 +83,21 @@ public class WristIOKrakens implements WristIO {
 
         //intake config
 
-        armIntakeMotor.configure(new SparkFlexConfig().apply(new ClosedLoopConfig().p(0.1)), com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        armIntakeMotor.configure(new SparkFlexConfig().apply(new ClosedLoopConfig().p(0.1)).smartCurrentLimit(50), com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
 
           
     
 
 
+    }
+
+    public void resetWrist() {
+        wristMotor.getEncoder().setPosition(1);
+    }
+
+    public void resetPivot() {
+        pivotMotor.getEncoder().setPosition((armEncoder.get() - offset) * 75);
     }
 
     public void updateInputs(WristIOInputs inputs, ManualMode mode) {
@@ -102,16 +110,12 @@ public class WristIOKrakens implements WristIO {
         inputs.current = armIntakeMotor.getOutputCurrent();
         inputs.pivotEncoderAbs = armEncoder.get() - offset;
 
-        SmartDashboard.putNumber("Arm current", inputs.current);
-
-        SmartDashboard.putNumber("Arm Angle Theoretical", inputs.pivotEncoderAbs);
-        SmartDashboard.putNumber("Arm angle actual", pivotMotor.getEncoder().getPosition());
+        SmartDashboard.putNumber("wrist angle", wristMotor.getEncoder().getPosition());
 
         // if (mode.equals(ManualMode.AUTOMATIC)) {
             SmartDashboard.putBoolean("r we doing automatic for the arm", true);
         pivotMotor.getClosedLoopController().setReference(setpointangle, ControlType.kPosition, ClosedLoopSlot.kSlot0, 12 * 0.018 * Math.cos(Units.rotationsToRadians(inputs.pivotEncoderAbs - offset)), ArbFFUnits.kVoltage);
-    SmartDashboard.putNumber("setpoint",  profiler_racial.getSetpoint().velocity * 60 );
-    SmartDashboard.putNumber("setpoint angle is act set", setpointangle );
+   
    // SmartDashboard.putNumber("velocity pivot",  pivot.getEncoder().getVelocity());
    
        //  motorL.set(0.05);

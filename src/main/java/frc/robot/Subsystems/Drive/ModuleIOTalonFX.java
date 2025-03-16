@@ -113,12 +113,16 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     turnConfig.Slot0 = SwerveConstants.instrinsicsS;
-    //turnConfig.Feedback.FeedbackRemoteSensorID = 3 * index + 3;
-    turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    turnConfig.Feedback.FeedbackRemoteSensorID = constants.canCoderID();
+    turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+    //turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     
 
-    turnConfig.Feedback.RotorToSensorRatio = 0;
-    turnConfig.Feedback.SensorToMechanismRatio = 18.75;
+
+    //turnConfig.Feedback.RotorToSensorRatio = 1;
+    //turnConfig.Feedback.SensorToMechanismRatio = 18.75;
+    turnConfig.Feedback.RotorToSensorRatio = 18.75;
+    turnConfig.Feedback.SensorToMechanismRatio = 1;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
     turnConfig.MotorOutput.Inverted =
 
@@ -136,13 +140,13 @@ public class ModuleIOTalonFX implements ModuleIO {
          constants.invertEncoder()
              ? SensorDirectionValue.Clockwise_Positive
              : SensorDirectionValue.CounterClockwise_Positive;
-    config.MagnetSensor.MagnetOffset = 0;
-    config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
+    config.MagnetSensor.MagnetOffset = constants.angleOffset();
+    config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
 
     cancoder.getConfigurator().apply(config, 0.25);
     turnTalon.getConfigurator().apply(turnConfig, 0.25);
      //turnTalon.setPosition(cancoder.getPosition().getValueAsDouble() - constants.angleOffset() );
-  turnTalon.setPosition(0);
+    //turnTalon.setPosition(0);
 
 
     // turnTalon.setPosition(

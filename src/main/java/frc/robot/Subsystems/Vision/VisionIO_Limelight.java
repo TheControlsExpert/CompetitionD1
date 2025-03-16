@@ -30,7 +30,7 @@ public class VisionIO_Limelight implements VisionIO {
     DoubleArraySubscriber Limelight_3GS = NetworkTableInstance.getDefault().getTable("limelight-threegs").getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[11], PubSubOption.keepDuplicates(true));
     DoubleArraySubscriber Limelight_3GS_stds = NetworkTableInstance.getDefault().getTable("limelight-threegs").getDoubleArrayTopic("stddevs").subscribe(new double[12], PubSubOption.keepDuplicates(true));
 
-    DoubleArraySubscriber Limelight_3GF = NetworkTableInstance.getDefault().getTable("limelight-threegf").getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[11], PubSubOption.keepDuplicates(true));
+    DoubleArraySubscriber Limelight_3GF = NetworkTableInstance.getDefault().getTable("limelight-threegf").getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[11], PubSubOption.keepDuplicates(true));
     DoubleArraySubscriber Limelight_3GF_stds = NetworkTableInstance.getDefault().getTable("limelight-threegf").getDoubleArrayTopic("stddevs").subscribe(new double[12], PubSubOption.keepDuplicates(true));
     
   

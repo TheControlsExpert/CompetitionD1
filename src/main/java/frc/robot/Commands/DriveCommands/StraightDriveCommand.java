@@ -24,7 +24,7 @@ public class StraightDriveCommand extends Command{
 
     @Override
     public void execute() {
-        drive.runVelocity(new ChassisSpeeds(-2, 0, 0));
+        drive.runVelocity(new ChassisSpeeds(0.5, 0, 0));
     }
 
 

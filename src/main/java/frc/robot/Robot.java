@@ -11,6 +11,7 @@ import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.wpilibj.CAN;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -54,7 +55,7 @@ public class Robot extends TimedRobot {
   private JoystickButton sixteen;
   private JoystickButton seventeen;
   private JoystickButton eighteen;
-  public static levelscore CurrnetLevelPosition = levelscore.Level4;
+  public static levelscore CurrnetLevelPosition = levelscore.Level3;
   public static ScoringPosition CurrnetScoringPosition = ScoringPosition.A;
   public static ReefMode reefMode = ReefMode.CORAL;
   
@@ -112,6 +113,9 @@ public class Robot extends TimedRobot {
      ButtonLevelscoring();
      ButtonScoringZones();
      ButtonReefMode();
+     RobotState.getInstance().getAlgaeLevel(m_robotContainer.drive.getEstimatedPosition());
+     RobotState.getInstance().getIntakingPose(m_robotContainer.drive.getEstimatedPosition());
+     SmartDashboard.putNumber("FMS TIME", DriverStation.getMatchTime());
      
 
     }
@@ -203,6 +207,11 @@ public static enum ReefMode {
         reefMode = ReefMode.CORAL;
       }
     }
+
+
+    public static void setScoringPosition(ScoringPosition position) {
+      CurrnetScoringPosition = position;
+    }
        
 
 
@@ -256,6 +265,8 @@ public static enum ReefMode {
 
   @Override
   public void testExit() {}
+
+  
 
 
   

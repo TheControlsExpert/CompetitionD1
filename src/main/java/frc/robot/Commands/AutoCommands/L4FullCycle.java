@@ -8,9 +8,9 @@ import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
 
 public class L4FullCycle extends SequentialCommandGroup {
 
-    public L4FullCycle(Superstructure superstructure) {
-        addCommands(Commands.runOnce(() -> {superstructure.setDesiredState(SuperstructureState.L4_STOWED);}, superstructure.intake, superstructure.pivot, superstructure.elevator, superstructure.wrist), 
-                    new EjectCommand(superstructure));    
-    }
+    // public L4FullCycle(Superstructure superstructure) {
+    //     addCommands(Commands.runOnce(() -> {superstructure.setDesiredState(SuperstructureState.L4_STOWED);}, superstructure.intake, superstructure.pivot, superstructure.elevator, superstructure.wrist), 
+    //                 new EjectCommand(superstructure));    
+    // }
     
 }

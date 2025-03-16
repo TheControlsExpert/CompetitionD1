@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
+import org.jgrapht.alg.color.SmallestDegreeLastColoring;
 import org.jgrapht.util.SupplierException;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // import static edu.wpi.first.units.Units.derive;
 
@@ -41,8 +43,8 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.WristConstants;
 
 public class Superstructure extends SubsystemBase {
-    WristIO wristIO;
-    ElevatorIO elevatorIO;
+    public WristIO wristIO;
+    public ElevatorIO elevatorIO;
     public ElevatorSubsystem elevator = new ElevatorSubsystem();
     public WristSubsystem wrist = new WristSubsystem();
     public PivotSubsystem pivot = new PivotSubsystem();
@@ -53,14 +55,17 @@ public class Superstructure extends SubsystemBase {
 
 //     Drive drive;
 
-    WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
-    ElevatorIOInputsAutoLogged elevatorInputs = new ElevatorIOInputsAutoLogged();
+    public WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
+    public ElevatorIOInputsAutoLogged elevatorInputs = new ElevatorIOInputsAutoLogged();
     
      private ManualMode manualMode = ManualMode.AUTOMATIC;
+
+    DigitalInput sensorResetting = new DigitalInput(2);
+    DigitalInput sensorIntaking = new DigitalInput(1);
      
 
-    private boolean hasScheduledYet = false;
-    public boolean hasDoneIntakeTest = false;
+    
+    public boolean Reset_ready = false;
 
     public static double encoderElevator = 0;
 
@@ -75,13 +80,46 @@ public class Superstructure extends SubsystemBase {
 
     public boolean hasCoral = true;
     public boolean hasAlgae = false;
-    public boolean isEjectingManually = true;
+    public boolean isEjectingManually = false;
 
 
     public Superstructure(WristIO wristIO, ElevatorIO elevatorIO) {
         this.wristIO = wristIO;
         this.elevatorIO = elevatorIO;
        // setpointsMap.put(current_state, null)
+
+
+       setpointsMap.put(SuperstructureState.HOME_UP, new Positions(0, 13, 2.5, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+       setpointsMap.put(SuperstructureState.HOME_ALGAE, new Positions(16, 13, 2.5, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+       setpointsMap.put(SuperstructureState.INTAKE, new Positions(16, 6, 15, Optional.empty(), Optional.empty(), Optional.of(false), Optional.empty()));
+       
+       setpointsMap.put(SuperstructureState.L4_STOWED, new Positions(20, 9, 61.5, Optional.empty(), Optional.empty(), Optional.of(true), Optional.empty()));
+       setpointsMap.put(SuperstructureState.L4_EJECTED, new Positions(20, -1, 40, Optional.empty(), Optional.of(50.0), Optional.of(true), Optional.of(0.1)));
+
+       setpointsMap.put(SuperstructureState.L3_STOWED, new Positions(0, 13, 29, Optional.empty(), Optional.empty(), Optional.of(true), Optional.empty()));
+       setpointsMap.put(SuperstructureState.L3_EJECTED, new Positions(0, -1, 29, Optional.of(1.0), Optional.empty(), Optional.of(true), Optional.of(0.3)));
+
+       setpointsMap.put(SuperstructureState.L2_STOWED, new Positions(0, 13, 9, Optional.empty(), Optional.empty(), Optional.of(true), Optional.empty()));
+       setpointsMap.put(SuperstructureState.L2_EJECTED, new Positions(0, -1, 9, Optional.empty(), Optional.of(1.0), Optional.of(true), Optional.of(0.1)));
+
+       setpointsMap.put(SuperstructureState.L1_STOWED, new Positions(15.5, -1, 10, Optional.empty(), Optional.empty(), Optional.of(true), Optional.empty()));
+       setpointsMap.put(SuperstructureState.L1_EJECTED, new Positions(16, -1, 10, Optional.empty(), Optional.of(1.0), Optional.of(true), Optional.of(0.2)));
+
+       setpointsMap.put(SuperstructureState.L3_ALGAE, new Positions(16, -5, 45, Optional.empty(), Optional.empty(), Optional.of(false), Optional.empty()));
+       setpointsMap.put(SuperstructureState.L2_ALGAE, new Positions(16, -5, 25, Optional.empty(), Optional.empty(), Optional.of(false), Optional.empty()));
+
+       setpointsMap.put(SuperstructureState.FIXING_WRIST, new Positions(0,0,0, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+       setpointsMap.put(SuperstructureState.FIXING_ELEVATOR,  new Positions(0,0,0, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+
+
+
+
+
+
+
+
+
+
     }
 
 
@@ -121,8 +159,12 @@ public static enum ManualMode {
 
 @Override
 public void periodic() {
+    SmartDashboard.putBoolean("has Coral", hasCoral);
+    SmartDashboard.putString("current state", current_state.toString());
     wristIO.updateInputs(wristInputs, manualMode);
     elevatorIO.updateInputs(elevatorInputs, manualMode);
+
+    Reset_ready = !sensorResetting.get();
 
 
     double avg = 0;
@@ -141,7 +183,7 @@ public void periodic() {
 
 
     //state transitions
-    if (manualMode.equals(ManualMode.AUTOMATIC)) {
+    // if (manualMode.equals(ManualMode.AUTOMATIC)) {
     if (!current_state.equals(desired_state) && isAtNode()) {
         current_state = desired_state;
     }
@@ -152,7 +194,7 @@ public void periodic() {
 
 
 
-    if (desired_state.equals(SuperstructureState.HOME_UP) || desired_state.equals(SuperstructureState.L2_EJECTED) || desired_state.equals(SuperstructureState.L3_EJECTED)) {
+    if (desired_state.equals(SuperstructureState.L2_EJECTED) || desired_state.equals(SuperstructureState.L3_EJECTED)) {
         wristIO.setVerticalAngle(setpointsMap.get(desired_state).ArmAngle);
         wristIO.setWristPosition(setpointsMap.get(desired_state).wristAngle);
 
@@ -164,7 +206,7 @@ public void periodic() {
 
     else if (desired_state.equals(SuperstructureState.L4_STOWED)) {
         elevatorIO.setPosition(setpointsMap.get(desired_state).elevatorEncoderRots);
-        if (elevatorInputs.encoderRotations_L > ElevatorConstants.minHeightforL4Pivot) {
+        if (Math.abs(elevatorInputs.encoderRotations_L - setpointsMap.get(desired_state).elevatorEncoderRots) < ElevatorConstants.toleranceElevator) {
             wristIO.setVerticalAngle(setpointsMap.get(desired_state).ArmAngle);
             wristIO.setWristPosition(setpointsMap.get(desired_state).wristAngle);
         }
@@ -176,15 +218,16 @@ public void periodic() {
 
 
 
-    else if (current_state.equals(SuperstructureState.HOME_UP)) {
-        elevatorIO.setPosition(setpointsMap.get(desired_state).elevatorEncoderRots);
-        if (elevatorInputs.encoderRotations_L > ElevatorConstants.minHeightAboveHome) {
-            wristIO.setVerticalAngle(setpointsMap.get(desired_state).ArmAngle);
-            wristIO.setWristPosition(setpointsMap.get(desired_state).wristAngle);
-        }
-
+    else if (desired_state.equals(SuperstructureState.FIXING_ELEVATOR) || desired_state.equals(SuperstructureState.FIXING_WRIST)) {
 
     }
+
+
+    // else if (hasAlgae) {
+    //     wristIO.setVerticalAngleSLOW(setpointsMap.get(SuperstructureState.L3_ALGAE).ArmAngle);
+    //     wristIO.setWristPositionSLOW(setpointsMap.get(SuperstructureState.L3_ALGAE).wristAngle);
+    //     elevatorIO.setPositionSLOW(setpointsMap.get(SuperstructureState.L3_ALGAE).elevatorEncoderRots);
+    // }
 
     
 
@@ -202,16 +245,16 @@ public void periodic() {
 
     //intake running
 
-
+SmartDashboard.putBoolean("isEjectingManually", isEjectingManually);
 
     if (!isEjectingManually) { 
 
-    if ((desired_state.equals(SuperstructureState.L1_EJECTED) || 
-        desired_state.equals(SuperstructureState.L2_EJECTED)  ||
-        desired_state.equals(SuperstructureState.L3_EJECTED)  ||
-        desired_state.equals(SuperstructureState.L4_EJECTED)) && ((setpointsMap.get(desired_state).ElevatorHeightForRelease.isPresent() && setpointsMap.get(desired_state).ElevatorHeightForRelease.get() > elevatorInputs.encoderRotations_L) || (setpointsMap.get(desired_state).PivotAngleForRelease.isPresent() && setpointsMap.get(desired_state).PivotAngleForRelease.get() > wristInputs.armAngle))) {
+    if ((current_state.equals(SuperstructureState.L1_EJECTED) || 
+        current_state.equals(SuperstructureState.L2_EJECTED)  ||
+        current_state.equals(SuperstructureState.L3_EJECTED)  ||
+        current_state.equals(SuperstructureState.L4_EJECTED))) {
 
-            wristIO.setOutputOpenLoop(setpointsMap.get(desired_state).outtakeSpeed.get());
+            wristIO.setOutputOpenLoop(setpointsMap.get(current_state).outtakeSpeed.get());
 
             //ready to eject
 
@@ -241,23 +284,39 @@ public void periodic() {
 }
 
 else {
-    wristIO.setOutputOpenLoop(0.5);
+    if(hasAlgae) {
+    wristIO.setOutputOpenLoop(1);
+    }
+
+    else {
+        wristIO.setOutputOpenLoop(0.5);
+    }
 
 }
 
 //controlling 
 
+SmartDashboard.putBoolean("intake sensor", !sensorIntaking.get());
+SmartDashboard.putNumber("avg current", avg);
+SmartDashboard.putBoolean("has algae", hasAlgae);
 
-if (current_state.equals(SuperstructureState.INTAKE) && avg > 30) {
+
+if (current_state.equals(SuperstructureState.INTAKE) && !sensorIntaking.get() && avg > 30) {
     hasCoral = true;
 
+}
+
+if (hasCoral && sensorIntaking.get()) {
+    hasCoral = false;
 }
 
 else if (current_state.equals(SuperstructureState.L2_ALGAE) || current_state.equals(SuperstructureState.L3_ALGAE) && avg > 30) {
    hasAlgae = true;
 }
 
-}
+
+
+
 
 
     
@@ -266,16 +325,22 @@ else if (current_state.equals(SuperstructureState.L2_ALGAE) || current_state.equ
 
 public void setDesiredState(SuperstructureState state) {
     if (setpointsMap.get(state).needsCoral.isPresent()) {
-        if (setpointsMap.get(state).needsCoral.get().equals(hasCoral)) {
+        if (setpointsMap.get(state).needsCoral.get().equals(hasCoral) || setpointsMap.get(state).needsCoral.get().equals(hasAlgae)) {
             this.desired_state = state;
+            SmartDashboard.putBoolean("needs coral value", setpointsMap.get(state).needsCoral.get());
         }
     }
 
+     else {
+
+    this.desired_state = state;
+     }
+
 }
 
-public void setManualMode(ManualMode manualMode) {
-    this.manualMode = manualMode;
-}
+// public void setManualMode(ManualMode manualMode) {
+//     this.manualMode = manualMode;
+// }
 
 
 
@@ -312,10 +377,15 @@ public boolean isAtNode() {
     double offsetPivot = Math.abs(setpointsMap.get(desired_state).ArmAngle - wristInputs.armAngle);
     double offsetWrist = Math.abs(setpointsMap.get(desired_state).wristAngle - wristInputs.wristAngle);
 
-    return ((offsetElevator < ElevatorConstants.toleranceElevator) && (offsetPivot < WristConstants.tolerancePivot) && (offsetWrist < WristConstants.toleranceWrist));
+    return ((offsetElevator < ElevatorConstants.toleranceElevator) && (offsetPivot < WristConstants.tolerancePivot) && (offsetWrist < WristConstants.toleranceWrist)) || (desired_state.equals(SuperstructureState.FIXING_ELEVATOR) || desired_state.equals(SuperstructureState.FIXING_WRIST));
     
 
+
+
 }
+
+
+
 
 
 
@@ -346,6 +416,10 @@ public boolean isAtNode() {
   L2_EJECTED,
   L3_EJECTED,
   L4_EJECTED,
+
+
+  FIXING_ELEVATOR,
+  FIXING_WRIST
 
 }
 

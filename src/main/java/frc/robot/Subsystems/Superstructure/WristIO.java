@@ -21,10 +21,22 @@ public interface WristIO {
         //public boolean reached_upper_limit = false; 
     }
 
+    default void setWristPositionSLOW(double angle) {
+    }
+
+    default void setVerticalAngleSLOW(double angle) {
+    }
+
 
     default void updateInputs(WristIOInputs inputs, ManualMode mode) {
     }
 
+    default void resetPivot() {}
+
+
+    default void resetWrist() {
+
+    }
     default void setWristPosition(double angle) {
     }
 

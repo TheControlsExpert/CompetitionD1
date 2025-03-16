@@ -86,7 +86,7 @@ public final class Constants {
       public static final boolean invertDrive = true;
       public static final boolean invertSteer = true;
       public static final boolean invertEncoder = false;
-      public static final double angleOffset = 0.053;
+      public static final double angleOffset = -0.054;
       // 36.123046875 + 2.28515625)
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(
@@ -108,7 +108,7 @@ public final class Constants {
       public static final boolean invertSteer = true;
       public static final boolean invertEncoder = false;
 
-      public static final double angleOffset = 0.734375 - 1;
+      public static final double angleOffset = -0.2019;
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(
               driveMotorID,
@@ -128,7 +128,7 @@ public final class Constants {
       public static final boolean invertDrive = false;
       public static final boolean invertSteer = true;
       public static final boolean invertEncoder = false;
-      public static final double angleOffset =  0.792;
+      public static final double angleOffset = 0.406;
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(
               driveMotorID,
@@ -148,7 +148,7 @@ public final class Constants {
       public static final boolean invertDrive = true;
       public static final boolean invertSteer = true;
       public static final boolean invertEncoder = false;
-      public static final double angleOffset = 0.03125;
+      public static final double angleOffset = -0.02832;
       ;
       // -120.937
       public static final SwerveModuleConstants constants =
@@ -162,8 +162,8 @@ public final class Constants {
               invertSteer);
     }
 
-    public static final double trackWidth = 0.63125;
-    public static final double wheelBase = 0.58125;
+    public static final double trackWidth = 0.624557;
+    public static final double wheelBase = 0.62081;
     public static final SwerveDriveKinematics swerveKinematics =
         new SwerveDriveKinematics(
             new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
@@ -192,8 +192,19 @@ public final class Constants {
     
     public static final Pose2d RightSource_BLUE = new Pose2d(1.277, 6.999, Rotation2d.fromDegrees(180 - 55));
     public static final Pose2d LeftSource_BLUE = new Pose2d(1.277, 1.053, Rotation2d.fromDegrees(-125));
-    public static final double REEF_Y_OFFSET = 0;
-    public static final double REEF_X_OFFSET = 0;
+
+    public static final Pose2d RightSource_RED = new Pose2d(16.54, 7.076, Rotation2d.fromDegrees(55));
+    public static final Pose2d LeftSource_RED = new Pose2d(16.58, 0.95, Rotation2d.fromDegrees(-55));
+
+    public static final double REEF_Y_OFFSET = 0.15;
+    public static final double REEF_X_OFFSET = 0.33;
+
+    public static final double REEF_Y_OFFSET_ALGAE = 0;
+    public static final double REEF_X_OFFSET_ALGAE = 0.33;
+
+    public static final double REEF_Y_OFFSET_STEPBACK = 0;
+    public static final double REEF_X_OFFSET_STEPBACK = 1;
+
 
 
 

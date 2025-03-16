@@ -11,14 +11,19 @@ public interface ElevatorIO {
     public static class ElevatorIOInputs {
         public double encoderRotations_L = 0.0;
         public double currentOutput_L = 0.0;
+        
     }
 
 
     public default void setPosition(double position) {}
 
+    public default void setPositionSLOW(double position) {}
+
     public default void resetPosition() {}
 
-   
+    public default double getEncoderSpeed() {
+        return 0.0;
+    }
     
     public default void updateInputs(ElevatorIOInputs inputs, ManualMode mode) {}
 

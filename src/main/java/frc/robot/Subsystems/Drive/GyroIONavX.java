@@ -14,12 +14,13 @@ import frc.robot.LimelightHelpers;
 import java.util.Queue;
 
 /** IO implementation for NavX. */
+
 public class GyroIONavX implements GyroIO {
   private final AHRS navX = new AHRS(NavXComType.kMXP_SPI, 200);
   private final BuiltInAccelerometer accelerometer = new BuiltInAccelerometer();
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
-  double rotation_offset =  0;
+  double rotation_offset = 0;
   double addON = 0;
   // private final Queue<Double> jerkXQueue;
   // private final Queue<Double> jerkYQueue;
@@ -29,7 +30,7 @@ public class GyroIONavX implements GyroIO {
   public GyroIONavX() {
 
     
-    LimelightHelpers.SetIMUMode("limelight-four", 1);
+    LimelightHelpers.SetIMUMode("limelight-four", 0);
    // LimelightHelpers.SetRobotOrientation("limelight-four", -navX.getYaw() + 20 + addON, 0 ,0 ,0 ,0 ,0 );
 
 
@@ -72,11 +73,11 @@ public class GyroIONavX implements GyroIO {
     inputs.connected = navX.isConnected();
     if (DriverStation.getAlliance().isPresent()) {
      addON = DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red) ? 180 : 0;
-     if (!hasResetLL4) {
-      hasResetLL4 = true;
-      LimelightHelpers.SetRobotOrientation("limelight-four", -navX.getYaw() + 17.6 + addON, 0 ,0 ,0 ,0 ,0 );
-      LimelightHelpers.SetIMUMode("limelight-four", 4);
-     }
+    //  if (!hasResetLL4) {
+    //   hasResetLL4 = true;
+    //   LimelightHelpers.SetRobotOrientation("limelight-four", -navX.getYaw() + 17.6 + addON, 0 ,0 ,0 ,0 ,0 );
+    //   LimelightHelpers.SetIMUMode("limelight-four", 4);
+    //  }
     }
     inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw()  + rotation_offset + addON);
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());
@@ -90,7 +91,7 @@ public class GyroIONavX implements GyroIO {
 
      inputs.odometryaccelXpositions = accelerometer.getX();
      inputs.odometryaccelYpositions = accelerometer.getY();
-    
+    SmartDashboard.putNumber("get gyro rate", getRate());
         
     LimelightHelpers.SetRobotOrientation("limelight-threegf", -navX.getYaw() + rotation_offset + addON , 0 ,0 ,0 ,0 ,0 );
     LimelightHelpers.SetRobotOrientation("limelight-threegs", -navX.getYaw() + rotation_offset + addON , 0 ,0 ,0 ,0 ,0 );
@@ -104,5 +105,10 @@ public class GyroIONavX implements GyroIO {
   public void resetGyro(Rotation2d rotation) {
     rotation_offset = rotation.getDegrees() - (-navX.getYaw());
 
+  }
+
+  public double getRate() {
+    //SmartDashboard.putNumber(, );
+    return navX.getRate();
   }
 }

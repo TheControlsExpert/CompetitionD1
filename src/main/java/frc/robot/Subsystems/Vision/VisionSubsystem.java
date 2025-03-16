@@ -23,7 +23,8 @@ public class VisionSubsystem extends SubsystemBase{
     private VisionIO io;
     private VisionIOInputsAutoLogged inputs = new VisionIOInputsAutoLogged();
         private Drive drive;
-
+   
+        
     double lastUsedTimestamp = -1000;
     private double minTranslation = 10000.0;   
     public double reeftransformX = 0;
@@ -58,7 +59,8 @@ public class VisionSubsystem extends SubsystemBase{
             posesLeft.add(inputs.MT2pose_LL4);
             timestampsLeft.add(inputs.time_LL4);
             SmartDashboard.putNumber("time ll4", inputs.time_LL4);
-            stdsLeft.add(times(2.5, inputs.visionSTDs_LL4));
+            double[] stds = {inputs.avgDistance_LL4 * 0.03 + 0.02, inputs.avgDistance_LL4 * 0.03 + 0.02};
+            stdsLeft.add(stds);
             }
     
             else {
@@ -66,17 +68,20 @@ public class VisionSubsystem extends SubsystemBase{
     
             }
     
-            if (inputs.isNew_LL3GF) {
-            posesLeft.add(inputs.MT2pose_LL3GF);
-            timestampsLeft.add(inputs.time_LL3GF);
-            stdsLeft.add(times(10, inputs.visionSTDs_LL3GF));
+            if (inputs.isNew_LL3GF && inputs.avgDistance_LL3GF > 0.000001) {
+        //         SmartDashboard.putBoolean("is new ll3gf", inputs.isNew_LL3GF);
+        //   posesLeft.add(inputs.MT2pose_LL3GF);
+        //   timestampsLeft.add(inputs.time_LL3GF);
+        //   double[] stds = {inputs.avgDistance_LL3GF * 0.06 + 0.02, inputs.avgDistance_LL3GF * 0.06 + 0.02};
+        //   stdsLeft.add(stds);
+          
             }
     
             if (inputs.isNew_LL3GS) {
-                posesLeft.add(inputs.MT2pose_LL3GS);
-                timestampsLeft.add(inputs.time_LL3GS);
-                stdsLeft.add(inputs.visionSTDs_LL3GS);
-                stdsLeft.add(times(10, inputs.visionSTDs_LL3GS));
+              //  posesLeft.add(inputs.MT2pose_LL3GS);
+              //  timestampsLeft.add(inputs.time_LL3GS);
+             //   stdsLeft.add(inputs.visionSTDs_LL3GS);
+              //  stdsLeft.add(times(10, inputs.visionSTDs_LL3GS));
             }
     
             if (!posesLeft.isEmpty()) {
@@ -121,11 +126,14 @@ public class VisionSubsystem extends SubsystemBase{
                 SmartDashboard.putBoolean("is trying to add", true);
                 SmartDashboard.putBoolean("two", !poses[i].equals(new Pose2d()));
                 SmartDashboard.putBoolean("three",  (poses[i].minus(drive.getEstimatedPosition()).getTranslation().getNorm() < 1 || DriverStation.isDisabled()));
-                if (times[i] > lastUsedTimestamp && poses[i].getTranslation().getNorm() > 0.1 && (poses[i].minus(drive.getEstimatedPosition()).getTranslation().getNorm() < 1 || DriverStation.isDisabled())) {
+                if (times[i] > lastUsedTimestamp && poses[i].getTranslation().getNorm() > 0.1 && (poses[i].minus(drive.getEstimatedPosition()).getTranslation().getNorm() < 10 || DriverStation.isDisabled())) {
                     lastUsedTimestamp = times[i];
                     SmartDashboard.putBoolean("is adding vision measurement to drive", true);
-    
+                    if (drive.getGyroSpeed() < 360) {
+
+                    
                     addVisionMeasurement(poses[i], times[i], stds[i]);
+                    }
                 }
             }
     
@@ -159,12 +167,7 @@ public class VisionSubsystem extends SubsystemBase{
     
             //if (pose.minus(drive.getEstimatedPosition()).getTranslation().getNorm() < 1) {
     
-            
-            if (pose.getTranslation().getNorm() < minTranslation) {
-            SmartDashboard.putNumber("min translation",  pose.getTranslation().getNorm() );
-                SmartDashboard.putBoolean("is adding vision", true);
-                    minTranslation = pose.getTranslation().getNorm();
-        }
+        
         drive.addVision(pose, timestamp, std);
        // }
        //field.setRobotPose(new Pose2d(pose.getTranslation(), Rotation2d.fromDegrees(-drive.getRotationLL())));

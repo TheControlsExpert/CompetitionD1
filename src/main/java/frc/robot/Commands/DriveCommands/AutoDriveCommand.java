@@ -63,7 +63,7 @@ public class AutoDriveCommand {
         // autoAmpPosePublisher = NetworkTableInstance.getDefault()
         //         .getStructTopic("Vision/autoAmpRobotPose", Pose2d.struct).publish();
 
-        pidConstants = new TrapezoidProfile.Constraints(PID_PROFILE_MAX_VELOCITY/8, PID_PROFILE_MAX_ACCELERATION/5);
+        pidConstants = new TrapezoidProfile.Constraints(PID_PROFILE_MAX_VELOCITY, PID_PROFILE_MAX_ACCELERATION);
         pidDriveToPosX = new ProfiledPIDController(kPtranslation, 0, 0, pidConstants);
         pidDriveToPosY = new ProfiledPIDController(kPtranslation, 0, 0, pidConstants);
        
@@ -142,16 +142,17 @@ public class AutoDriveCommand {
 
         
 
-        autoAmpPosePublisher.set(targetPose);
+       // autoAmpPosePublisher.set(targetPose);
         
 
         //Convert to chassis speed and return
         if (DriverStation.getAlliance().get().equals(Alliance.Red)) {
             return new ChassisSpeeds(-speedX, -speedY, speedRotation);
-        }
+        
+         }
 
-        else {
-            return new ChassisSpeeds(speedX, speedY, speedRotation);
+         else {
+             return new ChassisSpeeds(speedX, speedY, speedRotation);
         }
         }
 

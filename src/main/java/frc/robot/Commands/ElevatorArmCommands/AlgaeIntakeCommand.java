@@ -42,7 +42,7 @@ public class AlgaeIntakeCommand extends Command {
         
 
         if (superstructure.hasAlgae) {
-        superstructure.setDesiredState(SuperstructureState.HOME_ALGAE);
+       superstructure.setDesiredState(SuperstructureState.HOME_ALGAE);
         }
 
         else {
@@ -50,7 +50,8 @@ public class AlgaeIntakeCommand extends Command {
         }
     }
     }
+}
 
 
     
-}
+

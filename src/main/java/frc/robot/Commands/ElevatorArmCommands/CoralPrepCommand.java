@@ -43,12 +43,20 @@ public class CoralPrepCommand extends Command {
        
    }
 
+
+   @Override
+   public boolean isFinished() {
+       return controller.rightTrigger().getAsBoolean();
+   }
+
    @Override
    public void end(boolean interrupted) {
        if (!controller.rightTrigger().getAsBoolean()) {
         superstructure.setDesiredState(SuperstructureState.HOME_UP);
         
        }
+
+
    }
 
 

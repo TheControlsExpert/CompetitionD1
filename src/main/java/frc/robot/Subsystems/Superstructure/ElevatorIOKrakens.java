@@ -26,11 +26,12 @@ import frc.robot.Subsystems.Superstructure.Superstructure.ManualMode;
 import frc.robot.util.CTREDoubleProfilerElevator;
 
 public class ElevatorIOKrakens implements ElevatorIO {
-        TalonFX motorL = new TalonFX(13, "rio");
+        TalonFX motorL = new TalonFX(20, "rio");
         TalonFX motorR = new TalonFX(14, "rio");
         double setpointPosition = 2;
         double timer = -10000;
         double fullTimer = -10000;
+        boolean slow = false;
        // double fulltimesincesetpointchange = -10000;
         //SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(ElevatorConstants.kS, ElevatorConstants.kV, 0);
         // VelocityVoltage velocityRequester = new VelocityVoltage(0);
@@ -42,11 +43,11 @@ public class ElevatorIOKrakens implements ElevatorIO {
 
     public ElevatorIOKrakens() {
         TalonFXConfiguration configL = new TalonFXConfiguration();
-        Slot0Configs slot0 = new Slot0Configs().withKV(0.121).withKS(0.0155* 12 ).withKG(0.031 * 12).withKP(0.03).withKA(0).withGravityType(GravityTypeValue.Elevator_Static);
+        Slot0Configs slot0 = new Slot0Configs().withKV(0.12).withKS(0.0115* 12 ).withKG(0.0295 * 12).withKP(0.03).withKA(0).withGravityType(GravityTypeValue.Elevator_Static);
         
         var motionMagicConfigs = configL.MotionMagic;
-        motionMagicConfigs.MotionMagicAcceleration = 75;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 70;
+        motionMagicConfigs.MotionMagicAcceleration = 100;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 100;
         configL.Slot0 = slot0;
         configL.MotorOutput.NeutralMode = NeutralModeValue.Brake;  
         configL.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -63,7 +64,7 @@ public class ElevatorIOKrakens implements ElevatorIO {
         //tune this to the bot
         configR.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motorR.getConfigurator().apply(configR);
-        motorR.setControl(new StrictFollower(13));
+        motorR.setControl(new StrictFollower(20));
         SparkFlexConfig config = new SparkFlexConfig();
         config.idleMode(IdleMode.kBrake);
         config.apply(new ClosedLoopConfig().p(0.0001));
@@ -78,9 +79,13 @@ public class ElevatorIOKrakens implements ElevatorIO {
     @Override
     public void updateInputs(ElevatorIOInputs inputs, ManualMode mode) {
         
-        inputs.encoderRotations_L = motorR.getPosition().getValueAsDouble();
+        inputs.encoderRotations_L = motorL.getPosition().getValueAsDouble();
         encoderPos = inputs.encoderRotations_L;
-        inputs.currentOutput_L = motorR.getStatorCurrent().getValueAsDouble();
+        inputs.currentOutput_L = motorL.getStatorCurrent().getValueAsDouble();
+
+        // if (slow) {
+        //     motorL.setControl(mm_request.)
+        // }
 
 
         SmartDashboard.putNumber("elevator speed", motorL.getVelocity().getValueAsDouble());
@@ -121,6 +126,7 @@ public class ElevatorIOKrakens implements ElevatorIO {
 
     @Override
     public void setPosition(double position) {
+        slow = false;
         if (DriverStation.isEnabled()) {
             if (position != setpointPosition) {
                 timer = Timer.getFPGATimestamp();
@@ -138,8 +144,26 @@ public class ElevatorIOKrakens implements ElevatorIO {
         
     }
 
+    // public void setPositionSLOW(double position) {
+    //     slow = true;
+    //     if (DriverStation.isEnabled()) {
+    //         if (position != setpointPosition) {
+    //             timer = Timer.getFPGATimestamp();
+    //             fullTimer = Timer.getFPGATimestamp();
+    //         }
+    //      setpointPosition = position;
+
+    //     // //assumes positive voltage results in moving up
+         
+
+    //     //profiler.runProfile(position, mm_request);
+    //     }
+    // }
+
+
+
     public void stop() {
-        motorL.setControl(new DutyCycleOut(0.03));
+        motorL.setControl(new DutyCycleOut(0.029));
     }
 
 
@@ -150,12 +174,11 @@ public class ElevatorIOKrakens implements ElevatorIO {
     }
 
     public void setOutputOpenLoop(double output) {
-        if (output == 0 || (56 - motorL.getPosition().getValueAsDouble() < 0 && output > 0) || (motorL.getPosition().getValueAsDouble() - 2 < 0 && output < 0)) {
-        motorL.set(0.03);
-        }
-        else {
-            motorL.set(output);
-        }
+      motorL.set(output);
+    }
+
+    public double getEncoderSpeed() {
+        return motorL.getVelocity().getValueAsDouble();
     }
 
     

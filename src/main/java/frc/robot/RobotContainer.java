@@ -33,18 +33,32 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SwerveConstants.Mod0;
 import frc.robot.Constants.SwerveConstants.Mod1;
 import frc.robot.Constants.SwerveConstants.Mod2;
 import frc.robot.Constants.SwerveConstants.Mod3;
 import frc.robot.Robot.ReefMode;
+import frc.robot.Commands.OH_SHIT;
+import frc.robot.Commands.AutoCommands.FullRun;
+import frc.robot.Commands.AutoCommands.L4FullCycle;
+import frc.robot.Commands.ClimbCommands.ClimbDownCommand;
+import frc.robot.Commands.ClimbCommands.ClimbUpCommand;
 import frc.robot.Commands.DriveCommands.AutoDriveCommand;
 import frc.robot.Commands.DriveCommands.DriveCommand;
 import frc.robot.Commands.DriveCommands.FeedforwardCharacterization;
 import frc.robot.Commands.DriveCommands.StraightDriveCommand;
+import frc.robot.Commands.DriveCommands.AutoAlignReef.AutoAlignReef;
+import frc.robot.Commands.DriveCommands.AutoAlignReef.FirstPartAutoAlign;
+import frc.robot.Commands.DriveCommands.AutoAlignReef.SecondPartAutoAlign;
+import frc.robot.Commands.DriveCommands.AutoAlignReef.ThirdPartAutoAlign;
 import frc.robot.Commands.ElevatorArmCommands.EjectCommand;
 import frc.robot.Commands.ElevatorArmCommands.IntakeCommand;
+import frc.robot.Commands.ElevatorArmCommands.ResetElevatorCommand;
+import frc.robot.Commands.ElevatorArmCommands.ResetWristCommand;
+import frc.robot.Commands.ElevatorArmCommands.AlgaeIntakeCommand;
 import frc.robot.Commands.ElevatorArmCommands.CoralPrepCommand;
+import frc.robot.Subsystems.Climb.Climb;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Drive.GyroIONavX;
 import frc.robot.Subsystems.Drive.ModuleIOTalonFX;
@@ -77,11 +91,11 @@ import com.pathplanner.lib.path.PathConstraints;
  */
 public class RobotContainer {
   // Subsystems
-  private final Drive drive;
+  public final Drive drive;
   
  private final PathConstraints constraints;
   private Command pathfindingCommand;
-  private final SendableChooser<Command> autoChooser;
+  //private final SendableChooser<Command> autoChooser;
 
 
   //public static Spark leds = new Spark(0);
@@ -92,7 +106,7 @@ public class RobotContainer {
   public final GenericHID LevelsController = new GenericHID(1);
   public final GenericHID PositionsController = new GenericHID(2);
   private final AutoDriveCommand driver = new AutoDriveCommand(2, 0.03, 0, 1);
-  //Superstructure superstructure;
+  Superstructure superstructure;
 
   private boolean isFlipped =
   DriverStation.getAlliance().isPresent()
@@ -101,47 +115,45 @@ public class RobotContainer {
   
   
     private GyroIONavX gyro;
+    
+        private VisionSubsystem vision;
 
+        private Climb climb = new Climb();
 
-        
-      
-        // Dashboard inputs
-        // final LoggedDashboardChooser<Command> autoChooser;
-      
-        /** The container for the robot. Contains subsystems, OI devices, and commands. */
-        public RobotContainer() {
-          autoChooser = AutoBuilder.buildAutoChooser();
+            
           
-          SmartDashboard.putData("Auto Chooser", autoChooser);
-
-        // this.intake = new Intake();
-          this.gyro = new GyroIONavX();
+            // Dashboard inputs
+            // final LoggedDashboardChooser<Command> autoChooser;
+          
+            /** The container for the robot. Contains subsystems, OI devices, and commands. */
+            public RobotContainer() {
+             // autoChooser = AutoBuilder.buildAutoChooser();
+              
+            //  SmartDashboard.putData("Auto Chooser", autoChooser);
+    
+            // this.intake = new Intake();
+              this.gyro = new GyroIONavX();
+            
+                // Real robot, instantiate hardware IO implementations
+                drive =
+                    new Drive(
+                        gyro,
+                        new ModuleIOTalonFX(Mod0.constants, 0),
+                        new ModuleIOTalonFX(Mod1.constants, 1),
+                        new ModuleIOTalonFX(Mod2.constants, 2),
+                        new ModuleIOTalonFX(Mod3.constants, 3));
         
-            // Real robot, instantiate hardware IO implementations
-            drive =
-                new Drive(
-                    gyro,
-                    new ModuleIOTalonFX(Mod0.constants, 0),
-                    new ModuleIOTalonFX(Mod1.constants, 1),
-                    new ModuleIOTalonFX(Mod2.constants, 2),
-                    new ModuleIOTalonFX(Mod3.constants, 3));
-    
-          // superstructure = new Superstructure(new WristIOKrakens(), new ElevatorIOKrakens());        
-           
-    
-            VisionSubsystem vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
+               superstructure = new Superstructure(new WristIOKrakens(), new ElevatorIOKrakens());        
+               
+        
+                 vision = new VisionSubsystem(new VisionIO_Limelight(), drive);
     
              constraints = new PathConstraints(
               2.0, 4.0,
               Units.degreesToRadians(400), Units.degreesToRadians(720));
       
       // Since AutoBuilder is configured, we can use it to build pathfinding commands
-       pathfindingCommand = AutoBuilder.pathfindToPose(
-              new Pose2d(16.30, 6.89, Rotation2d.fromDegrees(58)),
-              constraints,
-              0.0 // Goal end velocity in meters/sec
-            
-      );
+    
       
         // Set up SysId routines
         //autoChooser.addOption(
@@ -181,9 +193,22 @@ public class RobotContainer {
                 drive,
                 controller));
 
+       // controller.().whileTrue(new IntakeCommand(superstructure));
+        controller.rightTrigger().whileTrue(new EjectCommand(superstructure, drive, vision).andThen(new ThirdPartAutoAlign(drive, vision, superstructure, controller)));
+         controller.leftTrigger().whileTrue(new CoralPrepCommand(superstructure, controller));
+         controller.x().whileTrue(new AutoAlignReef(drive, vision, superstructure, controller));
+        // controller.y().onTrue(new OH_SHIT(superstructure));
+         controller.leftBumper().whileTrue(new IntakeCommand(superstructure));
+         controller.button(8).whileTrue(new ClimbUpCommand(climb));
+         controller.button(7).whileTrue(new ClimbDownCommand(climb));
+         controller.a().onTrue(new ResetWristCommand(superstructure));
+         controller.b().onTrue(new ResetElevatorCommand(superstructure));
+         controller.y().whileTrue(new AlgaeIntakeCommand(superstructure, drive, controller));
+
+        
         // controller.leftStick().     
         
-      //  controller.leftBumper().whileTrue(Commands.either(Commands.startEnd(() -> {superstructure.setIntakeManual(0.2);}, () -> {superstructure.setIntakeManual(0);}, superstructure.intake),
+       // controller.leftBumper().whileTrue(Commands.either(Commands.startEnd(() -> {superstructure.setIntakeManual(0.2);}, () -> {superstructure.setIntakeManual(0);}, superstructure.intake),
         //                                                   new IntakeCommand(superstructure), 
         //                                                  () -> (superstructure.getManualMode().equals(ManualMode.MANUAL))));
         // controller.leftTrigger().and(() -> (superstructure.hasCoral)).whileTrue(new PrepCommand(superstructure, controller));
@@ -221,7 +246,7 @@ public class RobotContainer {
       
     // drive.runVelocity(
     //     ChassisSpeeds.fromFieldRelativeSpeeds(
-    //       driver.getTargetSpeeds(drive.getEstimatedPosition(), RobotState.getInstance().getScoringPose()),
+    //       driver.getTargetSpeeds(drive.getEstimatedPosition(), FieldConstants.LeftSource_RED),
             
     //        isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI))
     //             : drive.getRotation())), drive));
@@ -312,7 +337,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+   // return new FullRun(drive, superstructure, vision);
+   return new StraightDriveCommand(1.4, drive);
 }
 
 

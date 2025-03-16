@@ -1,18 +1,40 @@
 package frc.robot.Commands.ElevatorArmCommands;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Commands.DriveCommands.AutoAlignReef.ThirdPartAutoAlign;
+import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Superstructure.Superstructure;
 import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
+import frc.robot.Subsystems.Vision.VisionSubsystem;
 
 public class EjectCommand extends Command {
     Superstructure superstructure;
     double initTime;
+    Drive drive;
+    VisionSubsystem vision;
 
-    public EjectCommand(Superstructure superstructure) {
+    public EjectCommand(Superstructure superstructure, Drive drive, VisionSubsystem vision) {
         this.superstructure = superstructure;
+        this.drive = drive;
+        this.vision = vision;
+
+        if (!superstructure.desired_state.equals(SuperstructureState.L1_STOWED) && !superstructure.desired_state.equals(SuperstructureState.L2_STOWED) && !superstructure.desired_state.equals(SuperstructureState.L3_STOWED) && !superstructure.desired_state.equals(SuperstructureState.L4_STOWED) && !superstructure.desired_state.equals(SuperstructureState.PROCESSOR) ) {
+            //superstructure.isEjectingManually = true;
+        
+
         addRequirements(superstructure.intake, superstructure.wrist, superstructure.pivot, superstructure.elevator);
+        }
+
+        else {
+            addRequirements(superstructure.intake, superstructure.wrist, superstructure.pivot, superstructure.elevator, drive);
+
+        }
     }
+
+
 
     @Override
     public void initialize() {
@@ -30,6 +52,7 @@ public class EjectCommand extends Command {
         }
 
         else if (superstructure.current_state.equals(SuperstructureState.L4_STOWED)) {
+            SmartDashboard.putBoolean("tried to set eject", true);
             superstructure.setDesiredState(SuperstructureState.L4_EJECTED);
         }
 
@@ -78,20 +101,29 @@ public class EjectCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        if (superstructure.current_state.equals(SuperstructureState.L1_EJECTED) || superstructure.current_state.equals(SuperstructureState.L2_EJECTED) || superstructure.current_state.equals(SuperstructureState.L3_EJECTED) || superstructure.current_state.equals(SuperstructureState.L4_EJECTED)) {
-             return true;
-        }
 
-        return false; 
+        
+      if (superstructure.isEjectingManually) {
+        return false;
+      }
+        return !superstructure.hasCoral; 
        
     }
      
     @Override
     public void end(boolean interrupted) {
-        superstructure.setDesiredState(SuperstructureState.HOME_UP);
+        //if (!superstructure.isEjectingManually) {
+        //superstructure.setDesiredState(SuperstructureState.HOME_UP);
+        //CommandScheduler.getInstance().schedule(new ThirdPartAutoAlign(drive, vision, superstructure));
+        //}
         superstructure.isEjectingManually = false;
         superstructure.hasAlgae = false;
-        superstructure.hasCoral = false;
+
+        if (interrupted) {
+            superstructure.setDesiredState(SuperstructureState.HOME_UP);
+            
+        }
+        //superstructure.hasCoral = false;
     }
     
 }
