@@ -20,8 +20,8 @@ public class GyroIONavX implements GyroIO {
   private final BuiltInAccelerometer accelerometer = new BuiltInAccelerometer();
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
-  double rotation_offset = 0;
-  double addON = 0;
+  double rotation_offset = 180;
+  double addON = 0; 
   // private final Queue<Double> jerkXQueue;
   // private final Queue<Double> jerkYQueue;
   private boolean resetHasntHappened = false;
@@ -103,7 +103,7 @@ public class GyroIONavX implements GyroIO {
   }
 
   public void resetGyro(Rotation2d rotation) {
-    rotation_offset = rotation.getDegrees() - (-navX.getYaw());
+    rotation_offset = rotation.getDegrees() - (-navX.getYaw() + addON);
 
   }
 

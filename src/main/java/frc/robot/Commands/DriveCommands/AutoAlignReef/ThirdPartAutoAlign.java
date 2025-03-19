@@ -54,9 +54,16 @@ public class ThirdPartAutoAlign extends Command {
         
 
         double multiplierY = RobotState.getInstance().getScoringDirection().equals(DirectionREEF.RIGHT) ? -1 : 1;
+        if (DriverStation.isAutonomous()) {
+            offsetY = - (vision.reeftransformY - FieldConstants.REEF_Y_OFFSET_STEPBACK * multiplierY);
+            offsetX = (vision.reeftransformX - FieldConstants.REEF_X_OFFSET_STEPBACK/2);
+
+        }
+
+        else {
          offsetY = - (vision.reeftransformY - FieldConstants.REEF_Y_OFFSET_STEPBACK * multiplierY);
          offsetX = (vision.reeftransformX - FieldConstants.REEF_X_OFFSET_STEPBACK);
-
+        }
          //odometryRelative = new SwerveDriveOdometry(SwerveConstants.swerveKinematics, drive.getRotation(), drive.lastModulePositions, new Pose);
          //hasResetAtLeastOnce = true;
 

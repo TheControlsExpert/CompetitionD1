@@ -11,10 +11,9 @@ import frc.robot.Subsystems.Vision.VisionSubsystem;
 
 public class AutoAlignReef extends SequentialCommandGroup {
 
-    public AutoAlignReef(Drive drive, VisionSubsystem vision, Superstructure superstructure, ScoringPosition scoringPosition) {
-        Robot.setScoringPosition(scoringPosition);
-        addCommands(new FirstPartAutoAlign(drive, superstructure), new SecondPartAutoAlign(drive, vision, superstructure));
-    }
+    public AutoAlignReef(Drive drive, VisionSubsystem vision, Superstructure superstructure, ScoringPosition scoringPosition, CommandXboxController controller) {
+        
+        addCommands(new FirstPartAutoAlign(drive, superstructure, scoringPosition), new SecondPartAutoAlign(drive, vision, superstructure), new EjectCommand(superstructure, drive, vision), new ThirdPartAutoAlign(drive, vision, superstructure, controller));    }
 
 
     public AutoAlignReef(Drive drive, VisionSubsystem vision, Superstructure superstructure, CommandXboxController controller) {

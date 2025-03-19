@@ -13,6 +13,7 @@ import frc.robot.RobotState;
 import frc.robot.Commands.DriveCommands.AutoDriveCommand;
 import frc.robot.Robot.ReefMode;
 import frc.robot.Robot.levelscore;
+import frc.robot.RobotContainer.ScoringPosition;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Superstructure.Superstructure;
 import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
@@ -20,20 +21,40 @@ import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
 public class FirstPartAutoAlign extends Command {
     Drive drive;
     Superstructure superstructure;
+    ScoringPosition position;
+    boolean shouldSet = false;
     AutoDriveCommand autoDriver = new AutoDriveCommand(2.1, 0.05, 0, 1);
 
 
     public FirstPartAutoAlign(Drive drive, Superstructure superstructure) {
-        
+        shouldSet = false;
         this.drive = drive;
         this.superstructure = superstructure;
         addRequirements(drive, superstructure.intake, superstructure.elevator, superstructure.wrist, superstructure.pivot);
         
     }
 
+    public FirstPartAutoAlign(Drive drive, Superstructure superstructure, ScoringPosition position) {
+        this.position = position;
+        shouldSet = true;
+        this.drive = drive;
+        this.superstructure = superstructure;
+        addRequirements(drive, superstructure.intake, superstructure.elevator, superstructure.wrist, superstructure.pivot);
+        
+    }
+
+    @Override
+    public void initialize() {
+        if (shouldSet) {
+        Robot.CurrnetScoringPosition = position;
+        }
+    }
+
 
     @Override
     public void execute() {
+
+        
         boolean isFlipped = DriverStation.getAlliance().get().equals(Alliance.Red);
           drive.runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(

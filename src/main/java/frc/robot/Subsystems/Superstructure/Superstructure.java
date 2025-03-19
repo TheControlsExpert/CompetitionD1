@@ -91,10 +91,10 @@ public class Superstructure extends SubsystemBase {
 
        setpointsMap.put(SuperstructureState.HOME_UP, new Positions(0, 13, 2.5, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
        setpointsMap.put(SuperstructureState.HOME_ALGAE, new Positions(16, 13, 2.5, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
-       setpointsMap.put(SuperstructureState.INTAKE, new Positions(16, 6, 15, Optional.empty(), Optional.empty(), Optional.of(false), Optional.empty()));
+       setpointsMap.put(SuperstructureState.INTAKE, new Positions(16, 15, 3.5, Optional.empty(), Optional.empty(), Optional.of(false), Optional.empty()));
        
-       setpointsMap.put(SuperstructureState.L4_STOWED, new Positions(20, 9, 61.5, Optional.empty(), Optional.empty(), Optional.of(true), Optional.empty()));
-       setpointsMap.put(SuperstructureState.L4_EJECTED, new Positions(20, -1, 40, Optional.empty(), Optional.of(50.0), Optional.of(true), Optional.of(0.1)));
+       setpointsMap.put(SuperstructureState.L4_STOWED, new Positions(0, 9, 61.5, Optional.empty(), Optional.empty(), Optional.of(true), Optional.empty()));
+       setpointsMap.put(SuperstructureState.L4_EJECTED, new Positions(0, -1, 40, Optional.empty(), Optional.of(50.0), Optional.of(true), Optional.of(0.1)));
 
        setpointsMap.put(SuperstructureState.L3_STOWED, new Positions(0, 13, 29, Optional.empty(), Optional.empty(), Optional.of(true), Optional.empty()));
        setpointsMap.put(SuperstructureState.L3_EJECTED, new Positions(0, -1, 29, Optional.of(1.0), Optional.empty(), Optional.of(true), Optional.of(0.3)));
@@ -204,6 +204,8 @@ public void periodic() {
 
     }
 
+
+
     else if (desired_state.equals(SuperstructureState.L4_STOWED)) {
         elevatorIO.setPosition(setpointsMap.get(desired_state).elevatorEncoderRots);
         if (Math.abs(elevatorInputs.encoderRotations_L - setpointsMap.get(desired_state).elevatorEncoderRots) < ElevatorConstants.toleranceElevator) {
@@ -301,16 +303,14 @@ SmartDashboard.putNumber("avg current", avg);
 SmartDashboard.putBoolean("has algae", hasAlgae);
 
 
-if (current_state.equals(SuperstructureState.INTAKE) && !sensorIntaking.get() && avg > 30) {
+if (current_state.equals(SuperstructureState.INTAKE) &&  avg > 30) {
     hasCoral = true;
 
 }
 
-if (hasCoral && sensorIntaking.get()) {
-    hasCoral = false;
-}
 
-else if (current_state.equals(SuperstructureState.L2_ALGAE) || current_state.equals(SuperstructureState.L3_ALGAE) && avg > 30) {
+
+else if ((current_state.equals(SuperstructureState.L2_ALGAE) || current_state.equals(SuperstructureState.L3_ALGAE)) && avg > 30) {
    hasAlgae = true;
 }
 

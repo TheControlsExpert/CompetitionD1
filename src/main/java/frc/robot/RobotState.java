@@ -33,7 +33,7 @@ public class RobotState {
   public static HashMap<ScoringPosition, DirectionREEF> DirectionGetter = new HashMap<>();
 
 
-  public static final double poseXOffCenterA = 1.35;
+  public static final double poseXOffCenterA = 4.489323 - (3.6576 - 0.75);
   
   //public static final double poseYOffCenterA = 0.33/2;
   public static final double poseYOffCenterA = 0;

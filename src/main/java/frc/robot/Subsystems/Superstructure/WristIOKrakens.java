@@ -110,7 +110,7 @@ public class WristIOKrakens implements WristIO {
         inputs.current = armIntakeMotor.getOutputCurrent();
         inputs.pivotEncoderAbs = armEncoder.get() - offset;
 
-        SmartDashboard.putNumber("wrist angle", wristMotor.getEncoder().getPosition());
+        SmartDashboard.putNumber("wrist angle", armEncoder.get());
 
         // if (mode.equals(ManualMode.AUTOMATIC)) {
             SmartDashboard.putBoolean("r we doing automatic for the arm", true);

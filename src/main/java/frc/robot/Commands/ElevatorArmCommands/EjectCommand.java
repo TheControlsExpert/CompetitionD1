@@ -10,6 +10,7 @@ import frc.robot.Subsystems.Superstructure.Superstructure;
 import frc.robot.Subsystems.Superstructure.Superstructure.SuperstructureState;
 import frc.robot.Subsystems.Vision.VisionSubsystem;
 
+
 public class EjectCommand extends Command {
     Superstructure superstructure;
     double initTime;
@@ -106,7 +107,10 @@ public class EjectCommand extends Command {
       if (superstructure.isEjectingManually) {
         return false;
       }
-        return !superstructure.hasCoral; 
+    
+      else {
+        return superstructure.current_state.equals(SuperstructureState.L1_EJECTED) || superstructure.current_state.equals(SuperstructureState.L2_EJECTED) || superstructure.current_state.equals(SuperstructureState.L3_EJECTED) || superstructure.current_state.equals(SuperstructureState.L4_EJECTED);
+      }
        
     }
      
@@ -123,7 +127,7 @@ public class EjectCommand extends Command {
             superstructure.setDesiredState(SuperstructureState.HOME_UP);
             
         }
-        //superstructure.hasCoral = false;
+        superstructure.hasCoral = false;
     }
     
 }

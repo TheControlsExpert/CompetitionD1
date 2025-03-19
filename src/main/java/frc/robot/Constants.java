@@ -174,6 +174,7 @@ public final class Constants {
     public static final double DRIVE_BASE_RADIUS =
         Math.sqrt(wheelBase * wheelBase / 4 + trackWidth * trackWidth / 4);
     public static final double WheelRadius = 0.0508;
+    //public static final double WheelRadius = 0.0477;
     public static final LinearVelocity MaxFreeSpeed = null;
     public static final double odometryConstant = 0;
     public static final double maxAccel = 0;
@@ -194,7 +195,7 @@ public final class Constants {
     public static final Pose2d LeftSource_BLUE = new Pose2d(1.277, 1.053, Rotation2d.fromDegrees(-125));
 
     public static final Pose2d RightSource_RED = new Pose2d(16.54, 7.076, Rotation2d.fromDegrees(55));
-    public static final Pose2d LeftSource_RED = new Pose2d(16.58, 0.95, Rotation2d.fromDegrees(-55));
+    public static final Pose2d LeftSource_RED = new Pose2d(16.9, 1.36, Rotation2d.fromDegrees(-55));
 
     public static final double REEF_Y_OFFSET = 0.15;
     public static final double REEF_X_OFFSET = 0.33;

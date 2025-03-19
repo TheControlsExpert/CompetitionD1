@@ -5,39 +5,45 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "AutoScoreH"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "3 Piece Top PT1"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "3 Piece Top PT2"
+            "name": "AutoIntake"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "3 Piece Top PT3"
+            "name": "AutoScoreK"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "3 Piece Top PT4"
+            "name": "AutoIntake"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "3 Piece Top PT5"
+            "name": "AutoScoreL"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

@@ -5,51 +5,33 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "3 Piece Bottom PT1"
+            "name": "AutoScoreF"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "L4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "3 Piece Bottom PT2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "3 Piece Bottom PT3  "
+            "name": "AutoIntake"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "L4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "3 Piece Bottom PT4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "3 Piece Bottom PT5"
+            "name": "AutoScoreC"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "L4"
+            "name": "AutoIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoScoreD"
           }
         }
       ]

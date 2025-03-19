@@ -51,10 +51,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.RobotState;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.SwerveConstants;
 //import frc.robot.Subsystems.Superstructure.Superstructure;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -179,7 +181,7 @@ private final Field2d m_field = new Field2d();
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
-  private SwerveDrivePoseEstimator SwervePoseEstimator = new SwerveDrivePoseEstimator(kinematics, getRotation(), lastModulePositions, new Pose2d(0, 0, new Rotation2d()), VecBuilder.fill(0.001,0.001, Radians.convertFrom(5, Degrees)), VecBuilder.fill(0.05, 0.05, 999999) );
+  private SwerveDrivePoseEstimator SwervePoseEstimator = new SwerveDrivePoseEstimator(kinematics, getRotation(), lastModulePositions, new Pose2d(0, 0, new Rotation2d()), VecBuilder.fill(0.005,0.005, Radians.convertFrom(5, Degrees)), VecBuilder.fill(0.05, 0.05, 999999) );
   
   
   
@@ -230,17 +232,7 @@ private final Field2d m_field = new Field2d();
                     new PIDConstants(0.1, 0.0, 0.0) // Rotation PID constants
              ),
              config, // The robot configuration
-             () -> {
-//               // Boolean supplier that controls when the path will be mirrored for the red alliance
-//               // This will flip the path being followed to the red side of the field.
-//               // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-             var alliance = DriverStation.getAlliance();
-               if (alliance.isPresent()) {
-                 return alliance.get() == DriverStation.Alliance.Red;
-              }
-               return false;
-             },
+             () -> {return false;},
              this // Reference to this subsystem to set requirements
      );
     // }
@@ -303,7 +295,7 @@ private final Field2d m_field = new Field2d();
           if (stdY < 0.01 && DriverStation.isDisabled()) {
             stdY = 0.01;
           }
-         m_field.setRobotPose(SwervePoseEstimator.getEstimatedPosition());
+         m_field.setRobotPose(RobotState.getInstance().getScoringPose());
           tester += 0.1;
           SmartDashboard.putNumber("tester", tester);
           //SmartDashboard.putNumber("bop bop", numTimes);
@@ -367,7 +359,7 @@ private final Field2d m_field = new Field2d();
 
          
    
-           SwervePoseEstimator.updateWithTime(sampleTimestamps[i], getRotation(), modulePositions);
+           SwervePoseEstimator.updateWithTime(sampleTimestamps[i],  rawGyroRotation, modulePositions);
 
 
            
@@ -564,6 +556,10 @@ private final Field2d m_field = new Field2d();
      // prevaccelX = accelX;
      // prevaccelY = accely;
       //m_field.setRobotPose(getPose());
+  }
+
+  public double[] getWheelRadiusCharacterizationPosition() {
+    return Arrays.stream(modules).mapToDouble(Module::getPositionRadians).toArray();
   }
 
 
@@ -818,12 +814,12 @@ private final Field2d m_field = new Field2d();
 
     public void resetPosition(Pose2d pose) {
       //poseLock.lock();
-      estimatedPose = pose;
-      gyroIO.resetGyro(pose.getRotation());
+      // = pose;
+      //gyroIO.resetGyro(pose.getRotation());
 
 
-      stdX = 0.1;
-      stdY = 0.1;
+      //stdX = 0.1;
+      //stdY = 0.1;
       //poseLock.unlock();
     }
   

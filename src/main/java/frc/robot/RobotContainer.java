@@ -40,7 +40,7 @@ import frc.robot.Constants.SwerveConstants.Mod2;
 import frc.robot.Constants.SwerveConstants.Mod3;
 import frc.robot.Robot.ReefMode;
 import frc.robot.Commands.OH_SHIT;
-import frc.robot.Commands.AutoCommands.FullRun;
+
 import frc.robot.Commands.AutoCommands.L4FullCycle;
 import frc.robot.Commands.ClimbCommands.ClimbDownCommand;
 import frc.robot.Commands.ClimbCommands.ClimbUpCommand;
@@ -48,10 +48,14 @@ import frc.robot.Commands.DriveCommands.AutoDriveCommand;
 import frc.robot.Commands.DriveCommands.DriveCommand;
 import frc.robot.Commands.DriveCommands.FeedforwardCharacterization;
 import frc.robot.Commands.DriveCommands.StraightDriveCommand;
+import frc.robot.Commands.DriveCommands.WheelRadiusCharacterization;
 import frc.robot.Commands.DriveCommands.AutoAlignReef.AutoAlignReef;
 import frc.robot.Commands.DriveCommands.AutoAlignReef.FirstPartAutoAlign;
 import frc.robot.Commands.DriveCommands.AutoAlignReef.SecondPartAutoAlign;
 import frc.robot.Commands.DriveCommands.AutoAlignReef.ThirdPartAutoAlign;
+import frc.robot.Commands.DriveCommands.AutoAlignSource.FirstPartAutoAlignSource;
+import frc.robot.Commands.DriveCommands.AutoAlignSource.SecondPartAutoAlignSource;
+import frc.robot.Commands.DriveCommands.AutoAlignSource.ThirdPartAutoAlignSource;
 import frc.robot.Commands.ElevatorArmCommands.EjectCommand;
 import frc.robot.Commands.ElevatorArmCommands.IntakeCommand;
 import frc.robot.Commands.ElevatorArmCommands.ResetElevatorCommand;
@@ -81,7 +85,10 @@ import java.util.Map;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -95,7 +102,7 @@ public class RobotContainer {
   
  private final PathConstraints constraints;
   private Command pathfindingCommand;
-  //private final SendableChooser<Command> autoChooser;
+  private final SendableChooser<Command> autoChooser;
 
 
   //public static Spark leds = new Spark(0);
@@ -107,10 +114,11 @@ public class RobotContainer {
   public final GenericHID PositionsController = new GenericHID(2);
   private final AutoDriveCommand driver = new AutoDriveCommand(2, 0.03, 0, 1);
   Superstructure superstructure;
+   boolean isInClimbMode = false;
 
-  private boolean isFlipped =
-  DriverStation.getAlliance().isPresent()
-  && DriverStation.getAlliance().get() == Alliance.Red;
+// private boolean isFlipped =
+// DriverStation.getAlliance().isPresent()
+// && DriverStation.getAlliance().get() == Alliance.Red;
   
   
   
@@ -127,8 +135,7 @@ public class RobotContainer {
           
             /** The container for the robot. Contains subsystems, OI devices, and commands. */
             public RobotContainer() {
-             // autoChooser = AutoBuilder.buildAutoChooser();
-              
+             
             //  SmartDashboard.putData("Auto Chooser", autoChooser);
     
             // this.intake = new Intake();
@@ -173,6 +180,38 @@ public class RobotContainer {
     
         // Configure the button bindings
         configureButtonBindings();
+
+        if (DriverStation.getAlliance().get().equals(Alliance.Blue)) {
+        NamedCommands.registerCommand("AutoScoreA", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.A, controller));
+        NamedCommands.registerCommand("AutoScoreB", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.B, controller));
+        NamedCommands.registerCommand("AutoScoreC", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.C, controller));
+        NamedCommands.registerCommand("AutoScoreD", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.D, controller));
+        NamedCommands.registerCommand("AutoScoreE", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.E, controller));
+        NamedCommands.registerCommand("AutoScoreF", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.F, controller));
+        NamedCommands.registerCommand("AutoScoreG", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.G, controller));
+        NamedCommands.registerCommand("AutoScoreH", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.H, controller));
+        NamedCommands.registerCommand("AutoScoreI", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.I, controller));
+        NamedCommands.registerCommand("AutoScoreJ", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.J, controller));
+        NamedCommands.registerCommand("AutoScoreK", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.K, controller));
+        NamedCommands.registerCommand("AutoScoreL", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.L, controller));
+        }
+        else {
+          NamedCommands.registerCommand("AutoScoreA", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.B, controller));
+          NamedCommands.registerCommand("AutoScoreB", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.A, controller));
+          NamedCommands.registerCommand("AutoScoreC", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.L, controller));
+          NamedCommands.registerCommand("AutoScoreD", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.K, controller));
+          NamedCommands.registerCommand("AutoScoreE", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.J, controller));
+          NamedCommands.registerCommand("AutoScoreF", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.I, controller));
+          NamedCommands.registerCommand("AutoScoreG", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.H, controller));
+          NamedCommands.registerCommand("AutoScoreH", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.G, controller));
+          NamedCommands.registerCommand("AutoScoreI", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.F, controller));
+          NamedCommands.registerCommand("AutoScoreJ", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.E, controller));
+          NamedCommands.registerCommand("AutoScoreK", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.D, controller));
+          NamedCommands.registerCommand("AutoScoreL", new AutoAlignReef(drive, vision, superstructure, ScoringPosition.C, controller));
+        }
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+
       }
     
      
@@ -200,10 +239,16 @@ public class RobotContainer {
         // controller.y().onTrue(new OH_SHIT(superstructure));
          controller.leftBumper().whileTrue(new IntakeCommand(superstructure));
          controller.button(8).whileTrue(new ClimbUpCommand(climb));
-         controller.button(7).whileTrue(new ClimbDownCommand(climb));
+         controller.button(7).onTrue(new InstantCommand(() -> {if (isInClimbMode) { isInClimbMode = false;} else { isInClimbMode = true;};}));
+
+
+
          controller.a().onTrue(new ResetWristCommand(superstructure));
          controller.b().onTrue(new ResetElevatorCommand(superstructure));
          controller.y().whileTrue(new AlgaeIntakeCommand(superstructure, drive, controller));
+        // controller.y().whileTrue(new WheelRadiusCharacterization(drive));
+         
+       // controller.rightBumper().whileTrue(new FirstPartAutoAlignSource(superstructure, drive).andThen(new );
 
         
         // controller.leftStick().     
@@ -242,15 +287,6 @@ public class RobotContainer {
        
 
         
-    //     controller.b().whileTrue(Commands.run(() -> 
-      
-    // drive.runVelocity(
-    //     ChassisSpeeds.fromFieldRelativeSpeeds(
-    //       driver.getTargetSpeeds(drive.getEstimatedPosition(), FieldConstants.LeftSource_RED),
-            
-    //        isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI))
-    //             : drive.getRotation())), drive));
-    
    // controller.x().whileTrue(Commands.runEnd(() -> {intake.setState(Intake_states.Bofore_First);}, () -> {intake.setState(Intake_states.Ready);}, intake));
     
     
@@ -338,7 +374,11 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
    // return new FullRun(drive, superstructure, vision);
-   return new StraightDriveCommand(1.4, drive);
+   //return new StraightDriveCommand(1.4, drive);
+   return new AutoAlignReef(drive, vision, superstructure, ScoringPosition.I, controller).andThen(new FirstPartAutoAlignSource(superstructure, drive)).andThen(new SecondPartAutoAlignSource(drive, superstructure)).andThen(new ThirdPartAutoAlignSource(drive, superstructure)).andThen(new AutoAlignReef(drive, vision, superstructure, ScoringPosition.K, controller)).andThen(new FirstPartAutoAlignSource(superstructure, drive)).andThen(new SecondPartAutoAlign(drive, vision, superstructure));
+
+
+ 
 }
 
 

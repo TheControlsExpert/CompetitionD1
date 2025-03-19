@@ -104,18 +104,6 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
       CommandScheduler.getInstance().run();
       //SmartDashboard.putNumber("accel", gyro.getWorldLinearAccelX());
-      SmartDashboard.putString("CurrnetScoringPosition", CurrnetLevelPosition.toString());
-      SmartDashboard.putNumber("current scoring location X ", RobotState.getInstance().getScoringPose().getMeasureX().magnitude());
-      SmartDashboard.putNumber("current scoring location Y ", RobotState.getInstance().getScoringPose().getMeasureY().magnitude());
-
-      SmartDashboard.putString("scoring pose", CurrnetScoringPosition.toString());
-      
-     ButtonLevelscoring();
-     ButtonScoringZones();
-     ButtonReefMode();
-     RobotState.getInstance().getAlgaeLevel(m_robotContainer.drive.getEstimatedPosition());
-     RobotState.getInstance().getIntakingPose(m_robotContainer.drive.getEstimatedPosition());
-     SmartDashboard.putNumber("FMS TIME", DriverStation.getMatchTime());
      
 
     }
@@ -197,16 +185,7 @@ public static enum ReefMode {
 
 
 
-    public void ButtonReefMode() {
-      if (seventeen.getAsBoolean()) {
-        reefMode = ReefMode.ALGAE;
-
-      }
-
-      else if (eighteen.getAsBoolean()) {
-        reefMode = ReefMode.CORAL;
-      }
-    }
+ 
 
 
     public static void setScoringPosition(ScoringPosition position) {
@@ -247,6 +226,20 @@ public static enum ReefMode {
 
   @Override
   public void teleopPeriodic() {
+
+    SmartDashboard.putString("CurrnetScoringPosition", CurrnetLevelPosition.toString());
+    SmartDashboard.putNumber("current scoring location X ", RobotState.getInstance().getScoringPose().getMeasureX().magnitude());
+    SmartDashboard.putNumber("current scoring location Y ", RobotState.getInstance().getScoringPose().getMeasureY().magnitude());
+
+    SmartDashboard.putString("scoring pose", CurrnetScoringPosition.toString());
+    
+   ButtonLevelscoring();
+   ButtonScoringZones();
+
+   RobotState.getInstance().getAlgaeLevel(m_robotContainer.drive.getEstimatedPosition());
+   RobotState.getInstance().getIntakingPose(m_robotContainer.drive.getEstimatedPosition());
+   SmartDashboard.putNumber("FMS TIME", DriverStation.getMatchTime());
+   
   }
 
   @Override
