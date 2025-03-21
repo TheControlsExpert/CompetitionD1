@@ -239,10 +239,11 @@ public class RobotContainer {
         // controller.y().onTrue(new OH_SHIT(superstructure));
          controller.leftBumper().whileTrue(new IntakeCommand(superstructure));
          controller.button(8).whileTrue(new ClimbUpCommand(climb));
-         controller.button(7).onTrue(new InstantCommand(() -> {if (isInClimbMode) { isInClimbMode = false;} else { isInClimbMode = true;};}));
+         controller.button(7).whileTrue(new ClimbDownCommand(climb));
+         //controller.button(7).onTrue(new InstantCommand(() -> {if (isInClimbMode) { isInClimbMode = false;} else { isInClimbMode = true;};}));
 
-
-
+        new JoystickButton(LevelsController, 5).onTrue(Commands.runOnce((() -> {superstructure.hasCoral = true;})));
+        
          controller.a().onTrue(new ResetWristCommand(superstructure));
          controller.b().onTrue(new ResetElevatorCommand(superstructure));
          controller.y().whileTrue(new AlgaeIntakeCommand(superstructure, drive, controller));
@@ -375,7 +376,7 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
    // return new FullRun(drive, superstructure, vision);
    //return new StraightDriveCommand(1.4, drive);
-   return new AutoAlignReef(drive, vision, superstructure, ScoringPosition.I, controller).andThen(new FirstPartAutoAlignSource(superstructure, drive)).andThen(new SecondPartAutoAlignSource(drive, superstructure)).andThen(new ThirdPartAutoAlignSource(drive, superstructure)).andThen(new AutoAlignReef(drive, vision, superstructure, ScoringPosition.K, controller)).andThen(new FirstPartAutoAlignSource(superstructure, drive)).andThen(new SecondPartAutoAlign(drive, vision, superstructure));
+   return new AutoAlignReef(drive, vision, superstructure, ScoringPosition.I, controller).andThen(new FirstPartAutoAlignSource(superstructure, drive)).andThen(new SecondPartAutoAlignSource(drive, superstructure)).andThen(new ThirdPartAutoAlignSource(drive, superstructure)).andThen(new FirstPartAutoAlign(drive, superstructure, ScoringPosition.K)).andThen(new SecondPartAutoAlign(drive, vision, superstructure)).andThen(new EjectCommand(superstructure, drive ,vision)).andThen(new FirstPartAutoAlignSource(superstructure, drive)).andThen(new SecondPartAutoAlignSource(drive, superstructure));
 
 
  

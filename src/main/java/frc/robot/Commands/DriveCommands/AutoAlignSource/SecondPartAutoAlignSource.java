@@ -2,7 +2,7 @@ package frc.robot.Commands.DriveCommands.AutoAlignSource;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotState;
 import frc.robot.Subsystems.Drive.Drive;
@@ -42,7 +42,7 @@ public class SecondPartAutoAlignSource extends Command {
             speedRotation = deltaRotation * kProtation;
         }
 
-        drive.runVelocity(new ChassisSpeeds(0.5, 0, speedRotation));
+        drive.runVelocity(new ChassisSpeeds(0.3, 0, speedRotation));
 
 
 
@@ -51,6 +51,7 @@ public class SecondPartAutoAlignSource extends Command {
 
     @Override
     public boolean isFinished() {
+        SmartDashboard.putBoolean("is second part finishing",superstructure.hasCoral);
         return superstructure.hasCoral;
     }
 

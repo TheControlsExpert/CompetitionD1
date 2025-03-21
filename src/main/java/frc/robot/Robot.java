@@ -55,6 +55,7 @@ public class Robot extends TimedRobot {
   private JoystickButton sixteen;
   private JoystickButton seventeen;
   private JoystickButton eighteen;
+  
   public static levelscore CurrnetLevelPosition = levelscore.Level3;
   public static ScoringPosition CurrnetScoringPosition = ScoringPosition.A;
   public static ReefMode reefMode = ReefMode.CORAL;

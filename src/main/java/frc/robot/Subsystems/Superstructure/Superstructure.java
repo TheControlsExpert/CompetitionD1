@@ -303,7 +303,7 @@ SmartDashboard.putNumber("avg current", avg);
 SmartDashboard.putBoolean("has algae", hasAlgae);
 
 
-if (current_state.equals(SuperstructureState.INTAKE) &&  avg > 30) {
+if (current_state.equals(SuperstructureState.INTAKE) &&  avg > 25) {
     hasCoral = true;
 
 }

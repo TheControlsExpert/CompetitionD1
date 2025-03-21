@@ -30,7 +30,7 @@ public class EjectCommand extends Command {
         }
 
         else {
-            addRequirements(superstructure.intake, superstructure.wrist, superstructure.pivot, superstructure.elevator, drive);
+            addRequirements(superstructure.intake, superstructure.wrist, superstructure.pivot, superstructure.elevator);
 
         }
     }
@@ -104,7 +104,7 @@ public class EjectCommand extends Command {
     public boolean isFinished() {
 
         
-      if (superstructure.isEjectingManually) {
+      if (superstructure.isEjectingManually || superstructure.current_state.equals(SuperstructureState.L1_EJECTED)) {
         return false;
       }
     

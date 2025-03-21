@@ -295,7 +295,7 @@ private final Field2d m_field = new Field2d();
           if (stdY < 0.01 && DriverStation.isDisabled()) {
             stdY = 0.01;
           }
-         m_field.setRobotPose(RobotState.getInstance().getScoringPose());
+         m_field.setRobotPose(getEstimatedPosition());
           tester += 0.1;
           SmartDashboard.putNumber("tester", tester);
           //SmartDashboard.putNumber("bop bop", numTimes);
@@ -808,7 +808,7 @@ private final Field2d m_field = new Field2d();
     }
 
     public Pose2d getEstimatedPosition() {
-      return SwervePoseEstimator.getEstimatedPosition();
+      return new Pose2d(SwervePoseEstimator.getEstimatedPosition().getTranslation(), gyroInputs.yawPosition);
     }
 
 
@@ -864,7 +864,12 @@ private final Field2d m_field = new Field2d();
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {
-    return 3.5;
+    if (DriverStation.isAutonomous()) {
+      return 5.5;
+    }
+    else {
+      return 4;
+    }
   }
 
   /** Returns the maximum angular speed in radians per sec. */

@@ -17,7 +17,7 @@ import frc.robot.Subsystems.Superstructure.Superstructure;
 public  class FirstPartAutoAlignSource extends Command{
     Superstructure superstructure;
     Drive drive;
-    Pose2d intakingPose = new Pose2d(16.9, 1.36, Rotation2d.fromDegrees(-50));
+    Pose2d intakingPose = new Pose2d(16.45, 1.33, Rotation2d.fromDegrees(-50));
 
     AutoDriveCommand autoDriver = new AutoDriveCommand(2.1, 0.05, 0, 1);
 

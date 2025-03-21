@@ -49,7 +49,7 @@ public class ThirdPartAutoAlign extends Command {
     @Override
     public void execute() {
 
-        if (vision.reeftransformX != 0 && vision.reeftransformY != 0) {
+        if (vision.reeftransformX != 0 && vision.reeftransformY != 0 && !superstructure.current_state.equals(SuperstructureState.L1_EJECTED)) {
 
         
 
@@ -78,7 +78,7 @@ public class ThirdPartAutoAlign extends Command {
     @Override
     public boolean isFinished() {
         //stop aligning when we are less than 1 cm off or segev starts driving
-        return  Math.hypot(offsetX, offsetY) < 0.02 || (Math.hypot(controller.getLeftX(), controller.getLeftY()) > 0.15) || (!superstructure.current_state.equals(SuperstructureState.L1_EJECTED) && !superstructure.current_state.equals(SuperstructureState.L2_EJECTED) && !superstructure.current_state.equals(SuperstructureState.L3_EJECTED) && !superstructure.current_state.equals(SuperstructureState.L4_EJECTED));
+        return  Math.hypot(offsetX, offsetY) < 0.02 || (Math.hypot(controller.getLeftX(), controller.getLeftY()) > 0.15) && (!superstructure.current_state.equals(SuperstructureState.L1_EJECTED) && !superstructure.current_state.equals(SuperstructureState.L2_EJECTED) && !superstructure.current_state.equals(SuperstructureState.L3_EJECTED) && !superstructure.current_state.equals(SuperstructureState.L4_EJECTED));
     }
     
 

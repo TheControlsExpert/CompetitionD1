@@ -51,7 +51,7 @@ public class AutoDriveCommand {
     private final double TARGET_IN_RANGE_THRESHOLD = 1.0; // m
     private final double TARGET_OUT_OF_RANGE_X_OFFSET = 0.1;// m
     private final double PID_PROFILE_MAX_VELOCITY = 4; // m/s
-    private final double PID_PROFILE_MAX_ACCELERATION = 7; // m/s^2
+    private final double PID_PROFILE_MAX_ACCELERATION = 5; // m/s^2
 
 
     public AutoDriveCommand(double kPtranslation, double kProtation, double translationMarge, double rotationMarge){
